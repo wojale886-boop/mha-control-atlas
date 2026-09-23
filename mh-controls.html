@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MHA 猎人操作图鉴 · 荒野 / 世界</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath fill='%2317191d' stroke='%23efba6b' d='M20 2 36 11v18L20 38 4 29V11Z'/%3E%3Cpath fill='none' stroke='%23efba6b' stroke-width='2' d='M12 28V12l8 10 8-10v16'/%3E%3C/svg%3E">
+<style>
+
+:root{
+  --bg:#14161A; --bg2:#1C1F26; --bg3:#252932; --bg4:#2E3340;
+  --pri:#F5A524; --pri2:#E07B12; --pri3:#C2410C;
+  --tx:#F3F4F6; --tx2:#9CA3AF; --tx3:#6B7280;
+  --ok:#34D399; --err:#F87171; --warn:#FBBF24; --info:#60A5FA;
+  --line:rgba(255,255,255,.08);
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:
+    radial-gradient(1200px 600px at 12% -8%, rgba(245,165,36,.13), transparent 60%),
+    radial-gradient(900px 500px at 92% 4%, rgba(194,65,12,.12), transparent 60%),
+    var(--bg);
+  color:var(--tx);
+  font-family:"Noto Sans","PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  font-size:14px; line-height:1.6; min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:8px;border:2px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:#3C4350}
+.wrap{max-width:1420px;margin:0 auto;padding:0 20px}
+
+/* header */
+.hero{padding:38px 0 22px;position:relative}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(245,165,36,.5),transparent)}
+.brand{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sigil{width:44px;height:44px;border-radius:12px;flex:none;display:grid;place-items:center;
+  background:linear-gradient(145deg,var(--pri),var(--pri3));
+  box-shadow:0 8px 24px rgba(245,165,36,.28);font-size:22px}
+h1{font-size:28px;font-weight:700;letter-spacing:.5px}
+.sub{color:var(--tx2);font-size:13px;margin-top:4px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.badge{font-size:12px;padding:4px 11px;border-radius:999px;background:var(--bg3);
+  border:1px solid var(--line);color:var(--tx2)}
+.badge.amber{background:rgba(245,165,36,.13);border-color:rgba(245,165,36,.35);color:var(--pri)}
+
+/* toolbar */
+.toolbar{position:sticky;top:0;z-index:40;padding:12px 0;
+  background:rgba(20,22,26,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.tb-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.search{position:relative;flex:1 1 240px;min-width:210px}
+.search input{width:100%;padding:11px 14px 11px 38px;border-radius:11px;
+  background:var(--bg3);border:1px solid var(--line);color:var(--tx);font-size:14px;
+  outline:none;transition:.2s;font-family:inherit}
+.search input:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(245,165,36,.14)}
+.search input::placeholder{color:var(--tx3)}
+.search .ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:14px}
+.tabs{display:flex;gap:6px;background:var(--bg3);padding:5px;border-radius:12px;border:1px solid var(--line)}
+.tab{padding:8px 16px;border-radius:9px;border:0;background:transparent;color:var(--tx2);
+  font-size:13px;font-weight:600;cursor:pointer;transition:.2s;font-family:inherit;white-space:nowrap}
+.tab:hover{color:var(--tx)}
+.tab.on{background:linear-gradient(145deg,var(--pri),var(--pri2));color:#1a1206;
+  box-shadow:0 4px 14px rgba(245,165,36,.3)}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.chip{padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:var(--bg2);
+  color:var(--tx2);font-size:12.5px;cursor:pointer;transition:.18s;font-family:inherit}
+.chip:hover{border-color:rgba(245,165,36,.4);color:var(--tx);transform:translateY(-1px)}
+.chip.on{background:rgba(245,165,36,.15);border-color:var(--pri);color:var(--pri);font-weight:600}
+.chip .dot{display:inline-block;width:8px;height:8px;border-radius:99px;margin-right:6px;vertical-align:1px}
+
+/* sections */
+.sect{margin:26px 0}
+.sect-h{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+.sect-h h2{font-size:18px;font-weight:600;letter-spacing:.4px}
+.sect-h .bar{width:4px;height:18px;border-radius:3px;background:linear-gradient(var(--pri),var(--pri3))}
+.sect-h .cnt{font-size:12px;color:var(--tx3);margin-left:auto}
+
+.card{background:linear-gradient(180deg,rgba(37,41,50,.72),rgba(28,31,38,.72));
+  border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+  box-shadow:0 6px 22px rgba(0,0,0,.28);backdrop-filter:blur(6px)}
+.card+.card{margin-top:14px}
+.card-h{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;
+  background:rgba(255,255,255,.02);transition:.18s;user-select:none}
+.card-h:hover{background:rgba(245,165,36,.06)}
+.card-h .t{font-size:14.5px;font-weight:600}
+.card-h .n{margin-left:auto;font-size:12px;color:var(--tx3);font-variant-numeric:tabular-nums}
+.card-h .ar{transition:.25s;color:var(--tx3);font-size:12px}
+.card.open .card-h .ar{transform:rotate(90deg);color:var(--pri)}
+.card-b{display:none;padding:0 16px 6px}
+.card.open .card-b{display:block}
+
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;font-size:12px;font-weight:600;color:var(--tx3);letter-spacing:.6px;
+  padding:9px 12px;background:var(--bg2);border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.045);vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tbody tr{transition:.14s}
+.tbl tbody tr:hover{background:rgba(245,165,36,.05)}
+.act{font-weight:500}
+.note{display:block;color:var(--tx3);font-size:12px;margin-top:3px}
+
+.keys{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.k{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:7px;
+  font-size:12.5px;font-weight:600;white-space:nowrap;line-height:1.5;
+  background:var(--bg4);border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 1px 0 rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);color:var(--tx)}
+.k.ps{background:rgba(96,165,250,.13);border-color:rgba(96,165,250,.35);color:#BFDBFE}
+.k.ps::before{content:"PS";font-size:9px;opacity:.65;font-weight:700}
+.k.xb{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.32);color:#A7F3D0}
+.k.xb::before{content:"XB";font-size:9px;opacity:.65;font-weight:700}
+.k.wild{background:rgba(245,165,36,.14);border-color:rgba(245,165,36,.36);color:#FCD34D}
+.k.amb{color:var(--tx3);font-style:italic}
+.plus{color:var(--tx3);font-size:11px;padding:0 1px}
+.hold{font-size:11px;color:var(--warn);margin-right:4px;font-weight:700}
+.flag{display:inline-block;margin-left:6px;font-size:10.5px;padding:1px 7px;border-radius:999px;
+  background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:var(--warn);
+  vertical-align:middle;font-weight:600;white-space:nowrap}
+mark{background:rgba(245,165,36,.32);color:#FDE68A;border-radius:3px;padding:0 2px}
+
+/* keyboard canvas */
+.canvas-box{background:linear-gradient(180deg,rgba(37,41,50,.6),rgba(28,31,38,.6));
+  border:1px solid var(--line);border-radius:var(--r);padding:14px;overflow-x:auto}
+.canvas-box svg{width:100%;height:auto;display:block;min-width:900px}
+.keycap{cursor:pointer;transition:.15s}
+.keycap:hover .cap-bg{fill:#4A5262}
+.keycap.sel .cap-bg{fill:var(--pri)}
+.keycap.sel .cap-tx{fill:#1A1206}
+.callout{cursor:pointer;transition:.15s}
+.callout:hover .co-tx{fill:var(--pri)}
+.callout.sel .co-tx{fill:var(--pri);font-weight:700}
+
+/* legend */
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;font-size:12.5px;color:var(--tx2)}
+.legend b{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+
+/* detail panel */
+.detail{margin-top:16px;display:grid;gap:14px;grid-template-columns:1fr}
+.dhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px}
+.dhead .bigk{font-size:20px;font-weight:700;padding:8px 18px;border-radius:11px;
+  background:linear-gradient(145deg,var(--pri),var(--pri2));color:#1A1206;
+  box-shadow:0 6px 18px rgba(245,165,36,.3)}
+.dhead .meta{font-size:13px;color:var(--tx2)}
+.dempty{padding:26px 16px;color:var(--tx3);text-align:center;font-size:13px}
+
+/* base map grid */
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(258px,1fr))}
+.mcell{background:linear-gradient(180deg,rgba(37,41,50,.7),rgba(28,31,38,.7));
+  border:1px solid var(--line);border-radius:12px;padding:13px 14px;transition:.2s}
+.mcell:hover{transform:translateY(-2px);border-color:rgba(245,165,36,.35);box-shadow:0 8px 22px rgba(0,0,0,.3)}
+.mcell .lbl{font-size:12.5px;color:var(--tx2);margin-bottom:9px;font-weight:500}
+.mcell .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mcell .arrow{color:var(--tx3);font-size:13px}
+
+/* weapons */
+.wgrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(122px,1fr))}
+.wbtn{padding:12px 8px;border-radius:12px;border:1px solid var(--line);background:var(--bg2);
+  color:var(--tx2);cursor:pointer;font-size:13px;font-weight:600;text-align:center;
+  transition:.18s;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:5px}
+.wbtn:hover{border-color:rgba(245,165,36,.45);color:var(--tx);transform:translateY(-2px);background:rgba(245,165,36,.07)}
+.wbtn.on{background:linear-gradient(145deg,rgba(245,165,36,.2),rgba(194,65,12,.14));
+  border-color:var(--pri);color:var(--pri)}
+.wbtn .ic{font-size:19px}
+.wbtn .tg{font-size:10px;color:var(--tx3);font-weight:500}
+.wbtn.on .tg{color:rgba(253,230,138,.75)}
+.whead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.whead h3{font-size:20px;font-weight:700}
+.whead .en{color:var(--tx3);font-size:12.5px}
+.tip{font-size:12.5px;color:var(--tx2);background:rgba(96,165,250,.08);
+  border:1px solid rgba(96,165,250,.22);border-radius:10px;padding:10px 13px;margin:12px 0}
+.tip b{color:#BFDBFE}
+.empty{padding:46px 20px;text-align:center;color:var(--tx3)}
+.empty .big{font-size:34px;margin-bottom:10px;opacity:.5}
+
+footer{margin-top:44px;padding:26px 0 40px;border-top:1px solid var(--line);color:var(--tx3);font-size:12.5px}
+footer h4{color:var(--tx2);font-size:13px;margin-bottom:8px;font-weight:600}
+.srcs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.srcs a{color:var(--tx2);text-decoration:none;font-size:12px;padding:4px 10px;border-radius:8px;
+  background:var(--bg2);border:1px solid var(--line);transition:.18s}
+.srcs a:hover{color:var(--pri);border-color:rgba(245,165,36,.4)}
+@media(max-width:720px){ h1{font-size:22px} .hero{padding:28px 0 20px} }
+</style>
+<link rel="stylesheet" href="mh-interface.css">
+</head>
+<body>
+
+<header class="atlas-header">
+  <a class="atlas-brand" href="#"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M20 3 35 12v16L20 37 5 28V12Z M12 27V13l8 9 8-9v14 M20 22v9"/></svg></span><span>MHA<span class="brand-sub">猎人操作图鉴</span></span></a>
+  <div class="header-tools"><span class="offline-indicator">本地交互图鉴</span><button class="subtle-button" id="list-button">两作全量对照</button><button class="subtle-button" id="review-button">存疑清单 <span id="review-count"></span></button></div>
+</header>
+<main class="atlas-main">
+  <section class="atlas-intro"><div><p class="eyebrow">HUNTER'S CONTROL ATLAS / 02</p><h1>让每一次操作，<span>一目了然。</span></h1><p class="intro-note">从按键到动作，从通用操作到武器招式。在同一张图上找到答案。</p></div><div class="intro-numbers"><div><strong>02</strong><span>狩猎世界</span></div><div><strong>14</strong><span>武器类型</span></div><div><strong>03</strong><span>输入体系</span></div></div></section>
+  <section class="atlas-controls" aria-label="筛选操作">
+    <div class="controls-top"><label class="field-label">游戏版本<select id="game-select"><option value="wilds">怪物猎人 · 荒野</option><option value="world">怪物猎人 · 世界 / 冰原</option></select></label><div class="domain-tabs" aria-label="操作类型"><button data-domain="combat" aria-pressed="true">战斗操作</button><button data-domain="system" aria-pressed="false">系统功能</button></div><div class="atlas-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/></svg><input id="atlas-search" aria-label="搜索当前视图动作或按键" placeholder="搜索当前视图：动作、按键、组合…" type="search"><button id="clear-search" aria-label="清空搜索">×</button></div></div>
+    <div class="controls-bottom"><div id="context-controls"></div><p id="context-description"></p></div>
+  </section>
+  <section class="atlas-map-section" aria-labelledby="map-title"><div class="map-heading"><div><span class="section-index">01 /</span><h2 id="map-title">通用动作</h2><span class="context-tag" id="map-subtitle"></span></div><p><span class="live-dot"></span><span id="binding-count" aria-live="polite"></span></p></div>
+    <div class="map-viewport"><div id="mapping-board" class="mapping-board"><aside id="left-functions" class="function-column" aria-label="左侧功能"></aside><div id="device-stage" class="device-stage"><div class="stage-heading"><span id="stage-title">KEYBOARD + MOUSE</span><span id="stage-version"></span></div><div class="device-tabs" role="tablist" aria-label="输入设备"><button id="tab-km" role="tab" data-device="km" aria-selected="true" aria-controls="view-km">键鼠</button><button id="tab-pad" role="tab" data-device="pad" aria-selected="false" aria-controls="view-pad">手柄</button></div><div id="view-km" role="tabpanel" aria-label="键鼠视图"><div id="keyboard-device" aria-label="可点击键盘"></div><div class="stage-bottom"><div class="input-legend"><span><i class="legend-bound"></i>当前有绑定</span><span><i class="legend-selected"></i>选中 / 连线</span><span><i class="legend-empty"></i>当前未收录</span></div><div id="mouse-device" aria-label="可点击鼠标"></div></div></div><div id="view-pad" role="tabpanel" aria-label="手柄视图" hidden><div id="pad-device" aria-label="可点击 DualSense 手柄"></div><div class="pad-caption">DualSense 无线控制器 · 点击按键查看对应功能</div></div><div class="stage-hint" id="selection-hint" aria-live="polite">点击按键或两侧功能，查看它们的对应关系。</div><button id="reset-selection" class="subtle-button">清除选中</button></div><aside id="right-functions" class="function-column" aria-label="右侧功能"></aside><svg id="connection-layer" aria-hidden="true"></svg></div></div>
+    <div class="map-footnote"><span>点击展开连线 · 悬停预览键位 · 两侧列表可滚动查看更多</span><span>组合键 <b>+</b> 同时按下 / 连招 <b>→</b> 依次输入 / <b>长按</b> 持续输入</span></div>
+  </section>
+  <section id="comparison" class="comparison-section" aria-labelledby="comparison-title"><div class="comparison-heading"><div><p class="eyebrow">CROSS-GAME REFERENCE</p><h2 id="comparison-title">两作键位对照</h2><p id="comparison-description"></p></div><div class="comparison-tools"><label class="sr-only" for="comparison-scope">对照范围</label><select id="comparison-scope"><option value="selection">当前选择 / 视图</option><option value="all">全部系统与 14 武器</option><option value="review">待核对条目</option></select><input id="comparison-search" type="search" aria-label="搜索两作全部对照" placeholder="搜索全部对照…"></div></div><div id="comparison-results"></div><div class="comparison-pagination"><span id="comparison-total" aria-live="polite"></span><button class="subtle-button" id="load-more">展开更多</button></div></section>
+  <noscript><p>请在浏览器中启用 JavaScript 以使用键位图和筛选功能。</p></noscript>
+</main>
+
+<footer>
+  <div class="wrap">
+    <h4>资料来源（部分输入仍待核对）</h4>
+    <div class="srcs">
+      <a href="https://gl.ali213.net/html/2025-2/1616997.html" target="_blank" rel="noopener">游侠网 · 荒野操作按键说明</a>
+      <a href="https://www.gamersky.com/handbook/202504/1910985_2.shtml" target="_blank" rel="noopener">游民星空 · 荒野铳枪招式按键（PC键鼠）</a>
+      <a href="https://www.shacknews.com/article/106612/pc-keyboard-controls-and-key-bindings-monster-hunter-world" target="_blank" rel="noopener">Shacknews · MHW 冰原 PC 键位</a>
+      <a href="https://www.3dmgame.com/gl/3745289.html" target="_blank" rel="noopener">3DM · MHW 键鼠 ⇄ PS4 手柄对照</a>
+      <a href="https://www.kxdw.com/gonglue/4070.html" target="_blank" rel="noopener">开心电玩 · MHW PC 按键一览</a>
+      <a href="https://www.magicgameworld.com/monster-hunter-world-pc-keyboard-controls/" target="_blank" rel="noopener">MagicGameWorld · MHW PC Controls</a>
+      <a href="https://shortcutposters.com/games/monster-hunter-world/" target="_blank" rel="noopener">ShortcutPosters · MHW 手柄对照</a>
+      <a href="https://www.3dmgame.com/gl/3951635.html" target="_blank" rel="noopener">3DM · 荒野 PS5 按键作用</a>
+    </div>
+    <p style="margin-bottom:8px">说明：本页记录的是<b style="color:var(--tx2)">出厂默认</b>键位。绝大部分键位可在游戏内 <b style="color:var(--tx2)">开始菜单 → 系统 → 选项 / 键鼠设置</b>（荒野）、<b style="color:var(--tx2)">选项 → 按键设置</b>（世界）中修改，少数按键为固定不可改。</p>
+    <p>武器招式栏中，键盘列由「手柄功能位 → 键鼠」基础映射机械推导得出；Capcom 会随版本平衡性更新调整派生，完整派生链请以游戏内 <b style="color:var(--tx2)">出招表 / 游玩指南</b> 为准。标有「待确认」的条目为多来源冲突或版本差异项。</p>
+  </div>
+</footer>
+
+<script>
+/* =========================================================
+   令牌：手柄功能位 → 标签 / 键鼠按键
+   ========================================================= */
+const TOKEN_LABEL = {
+  t : ['△','Y'],   c : ['○','B'],   x : ['✕','A'],   s : ['□','X'],
+  r2: ['R2','RT'], r1: ['R1','RB'], l2: ['L2','LT'], l1: ['L1','LB'],
+  tc: ['△+○','Y+B'], r3: ['R3','右摇杆按下'], ls: ['左摇杆','LS'], rs: ['右摇杆','RS'], dp: ['方向键','D-Pad']
+};
+const KEYMAP = {
+  wilds: {
+    melee : { t:'鼠标左键', c:'鼠标右键', x:'空格', s:'E', r2:'R', r1:'Shift',
+              l2:'Alt（按一次）／鼠标侧键2（长按）', tc:'鼠标侧键1', l1:'Ctrl（长按）', r3:'B' },
+    ranged: { t:'R', c:'鼠标侧键1', x:'空格', s:'E', r2:'鼠标左键', r1:'Shift',
+              l2:'Alt（按一次）／鼠标侧键2（长按）', tc:'鼠标侧键1', l1:'Ctrl（长按）', r3:'B' }
+  },
+  world: {
+    melee : { t:'鼠标左键', c:'鼠标右键', x:'空格', s:'E', r2:'鼠标侧键2（MB5）', r1:'Shift',
+              l2:'C（长按）／鼠标中键（按一次）', tc:'鼠标侧键1（MB4）', l1:'Q', r3:'—' },
+    ranged: { t:'鼠标侧键1（MB4）', c:'鼠标侧键2（MB5）', x:'空格', s:'E', r2:'鼠标左键', r1:'Shift',
+              l2:'鼠标右键（长按）', tc:'鼠标侧键1（MB4）', l1:'Q', r3:'—' }
+  }
+};
+
+/* 分类配色 */
+const CATS = [
+  { id:'all',    name:'全部',       color:'#F5A524' },
+  { id:'combat', name:'战斗·移动',  color:'#F5A524' },
+  { id:'menu',   name:'菜单',       color:'#60A5FA' },
+  { id:'item',   name:'道具·快捷栏', color:'#FBBF24' },
+  { id:'map',    name:'地图',       color:'#34D399' },
+  { id:'online', name:'联机·交流',  color:'#A78BFA' },
+  { id:'mount',  name:'坐骑·骑乘',  color:'#22D3EE' },
+  { id:'camera', name:'视角·拍照',  color:'#F472B6' }
+];
+const CATN = {}, CATC = {};
+CATS.forEach(c => { CATN[c.id] = c.name; CATC[c.id] = c.color; });
+
+/* =========================================================
+   通用键位数据（kb = 该绑定落在键盘图上的按键）
+   ========================================================= */
+const GENERAL = {
+  wilds: [
+    { cat:'menu', name:'菜单操作', rows:[
+      { a:'选择菜单项目 / 变更数值：上', g:'左摇杆↑ / 方向键↑', k:'W / ↑', kb:['W','↑'] },
+      { a:'选择菜单项目 / 变更数值：下', g:'左摇杆↓ / 方向键↓', k:'S / ↓', kb:['S','↓'] },
+      { a:'选择菜单项目：左', g:'左摇杆← / 方向键←', k:'A / ←', kb:['A','←'] },
+      { a:'选择菜单项目：右', g:'左摇杆→ / 方向键→', k:'D / →', kb:['D','→'] },
+      { a:'确定', g:'✕ / A', k:'F / 空格', kb:['F','空格'] },
+      { a:'返回（取消）', g:'○ / B', k:'鼠标右键 / ESC', kb:['右键','Esc'] },
+      { a:'切换页面 / 页签：左', g:'L1 / LB', k:'Q', kb:['Q'] },
+      { a:'切换页面 / 页签：右', g:'R1 / RB', k:'E', kb:['E'] },
+      { a:'切换状态 / 类别：左', g:'L2 / LT', k:'Z', kb:['Z'] },
+      { a:'切换状态 / 类别：右', g:'R2 / RT', k:'C', kb:['C'] },
+      { a:'旋转模型 / 切换页面：左', g:'—', k:'1', kb:['1'] },
+      { a:'旋转模型 / 切换页面：右', g:'—', k:'3', kb:['3'] },
+      { a:'放大模型', g:'—', k:'鼠标滚轮上滑', kb:['滚轮上'] },
+      { a:'缩小模型', g:'—', k:'鼠标滚轮下滑', kb:['滚轮下'] },
+      { a:'子菜单', g:'—', k:'R', kb:['R'] },
+      { a:'登记 / 调用个人组合', g:'—', k:'Shift', kb:['Shift'] },
+      { a:'切换操作列', g:'—', k:'Alt', kb:['Alt'] },
+      { a:'筛选显示项目', g:'—', k:'X', kb:['X'] },
+      { a:'排序项目或列表', g:'—', k:'G', kb:['G'] },
+      { a:'切换项目 / 列表显示方式', g:'—', k:'Tab', kb:['Tab'] },
+      { a:'跳过结算画面 / 过场动画', g:'触摸板 / View', k:'Y', kb:['Y'] }
+    ]},
+    { cat:'map', name:'原野地图', rows:[
+      { a:'缩小原野地图', g:'—', k:'Q / 鼠标滚轮下滑', kb:['Q','滚轮下'] },
+      { a:'放大原野地图', g:'—', k:'E / 鼠标滚轮上滑', kb:['E','滚轮上'] },
+      { a:'重置光标位置', g:'—', k:'Shift', kb:['Shift'] },
+      { a:'设置目标', g:'—', k:'X', kb:['X'] },
+      { a:'切换全局地图', g:'—', k:'R', kb:['R'] },
+      { a:'关闭原野地图', g:'触摸板 / View', k:'M', kb:['M'] },
+      { a:'切换全屏 / 半屏', g:'—', k:'N', kb:['N'] },
+      { a:'查看环境概要', g:'—', k:'G', kb:['G'] },
+      { a:'旋转模式（长按）', g:'—', k:'Ctrl', kb:['Ctrl'] }
+    ]},
+    { cat:'combat', name:'移动 · 战斗（近战武器通用）', rows:[
+      { a:'移动', g:'左摇杆', k:'W / A / S / D', kb:['W','A','S','D'] },
+      { a:'冲刺（按一次）/ 纳刀', g:'R1 / RB', k:'Shift', kb:['Shift'] },
+      { a:'冲刺（长按）/ 纳刀', g:'R1 / RB', k:'Shift（长按）', kb:['Shift'] },
+      { a:'下蹲 / 回避', g:'✕ / A', k:'空格', kb:['空格'] },
+      { a:'调查 / 对话 / 采集 / 剥取', g:'○ / B（纳刀时）', k:'F', kb:['F'], u:1, n:'手柄为上下文复用键；键盘有独立 F 键' },
+      { a:'使用道具 / 纳刀', g:'□ / X', k:'E', kb:['E'] },
+      { a:'大厅 / 营地内：切换目标 NPC（右）', g:'方向键 →', k:'R', kb:['R'] },
+      { a:'打开开始菜单', g:'选项键 / Menu', k:'ESC / H', kb:['Esc','H'] },
+      { a:'拔刀 / 普通攻击', g:'△ / Y', k:'鼠标左键', kb:['左键'] },
+      { a:'特殊攻击（拔刀后）', g:'○ / B', k:'鼠标右键', kb:['右键'] },
+      { a:'防御 / 武器特殊动作', g:'R2 / RT', k:'R', kb:['R'] },
+      { a:'同时按下动作（△+○）', g:'△+○ / Y+B', k:'鼠标侧键1', kb:['侧键1'] },
+      { a:'集中模式 / 纳刀时投射器瞄准（按一次切换）', g:'L2 / LT', k:'Alt', kb:['Alt'] },
+      { a:'集中模式（长按）', g:'L2 / LT（长按）', k:'鼠标侧键2', kb:['侧键2'] },
+      { a:'集中弱点攻击（集中模式中）', g:'R1 / RB', k:'Shift', kb:['Shift'], u:1, n:'与冲刺共用 R1/Shift，仅在集中模式下生效' },
+      { a:'穿脱衣装', g:'—', k:'C', kb:['C'] },
+      { a:'投射器发射（瞄准时）', g:'R2 / RT', k:'鼠标中键', kb:['中键'] },
+      { a:'钩锁投射器发射（瞄准时）', g:'△ / Y', k:'F', kb:['F'], u:1 },
+      { a:'导虫通知选择：上', g:'方向键 ↑', k:'Page Up', kb:['PageUp'] },
+      { a:'导虫通知选择：下', g:'方向键 ↓', k:'Q / Page Down', kb:['Q','PageDown'] },
+      { a:'导虫目标选择：下', g:'方向键 ↓', k:'Tab', kb:['Tab'] }
+    ]},
+    { cat:'combat', name:'远程武器通用（与近战重复项略）', rows:[
+      { a:'装填弹药 / 装填或解除瓶', g:'△ / Y', k:'R', kb:['R'], u:1, n:'远程武器下 △ 键位语义变为装填，与近战的 △=攻击不同' },
+      { a:'拔刀 / 普通射击', g:'R2 / RT', k:'鼠标左键', kb:['左键'] },
+      { a:'武器 / 投射器瞄准（按一次）', g:'L2 / LT', k:'Alt', kb:['Alt'] },
+      { a:'武器 / 投射器瞄准（长按）', g:'L2 / LT（长按）', k:'鼠标侧键2', kb:['侧键2'] },
+      { a:'追加键：瞄准线（长按）', g:'L2 / LT', k:'鼠标右键', kb:['右键'] },
+      { a:'防御 / 武器特殊动作', g:'△+○ / Y+B', k:'鼠标侧键1', kb:['侧键1'] },
+      { a:'切换模式', g:'—', k:'F', kb:['F'] },
+      { a:'切换道具：左', g:'方向键 ←', k:'←', kb:['←'] },
+      { a:'切换道具：右', g:'方向键 →', k:'→', kb:['→'] },
+      { a:'选择弹药 / 瓶：上', g:'方向键 ↑', k:'鼠标滚轮上滑 / ↑', kb:['滚轮上','↑'] },
+      { a:'选择弹药 / 瓶：下', g:'方向键 ↓', k:'鼠标滚轮下滑 / ↓', kb:['滚轮下','↓'] },
+      { a:'防御', g:'R2 / RT', k:'R', kb:['R'], u:1, n:'重弩盾牌等武器专用' }
+    ]},
+    { cat:'mount', name:'骑乘怪物 / 操龙', rows:[
+      { a:'骑乘时小刀弱攻击', g:'△ / Y', k:'鼠标左键', kb:['左键'] },
+      { a:'骑乘时小刀强攻击', g:'○ / B', k:'鼠标右键', kb:['右键'] },
+      { a:'骑乘时武器攻击', g:'R2 / RT', k:'R', kb:['R'] },
+      { a:'从怪物上下来（长按）', g:'—', k:'E', kb:['E'] },
+      { a:'忍耐（抵抗甩落）', g:'—', k:'Shift', kb:['Shift'] }
+    ]},
+    { cat:'mount', name:'鹭鹰龙（坐骑）', rows:[
+      { a:'召唤鹭鹰龙（自动移动）/ 切换自动移动', g:'方向键 ↑', k:'Tab', kb:['Tab'] },
+      { a:'召唤鹭鹰龙（手动移动）/ 切换手动移动', g:'方向键 ↓', k:'Q', kb:['Q'] },
+      { a:'查看鹭鹰龙道具袋', g:'方向键 ←', k:'N', kb:['N'] },
+      { a:'切换武器', g:'方向键 →', k:'X', kb:['X'] },
+      { a:'加速（按 1 次）/ 全速前进（长按）', g:'R1 / RB', k:'Shift', kb:['Shift'] },
+      { a:'减速（按 1 次）/ 急停（长按）', g:'L2 / LT', k:'Z', kb:['Z'] },
+      { a:'从鹭鹰龙上下来', g:'✕ / A', k:'空格', kb:['空格'] },
+      { a:'骑乘攻击', g:'△ / Y', k:'鼠标左键', kb:['左键'] }
+    ]},
+    { cat:'item', name:'道具 · 快捷栏', rows:[
+      { a:'切换道具：左', g:'方向键 ←', k:'鼠标滚轮上滑 / ←', kb:['滚轮上','←'] },
+      { a:'切换道具：右', g:'方向键 →', k:'鼠标滚轮下滑 / →', kb:['滚轮下','→'] },
+      { a:'选择弹药 / 瓶：上', g:'方向键 ↑', k:'↑', kb:['↑'] },
+      { a:'选择弹药 / 瓶：下', g:'方向键 ↓', k:'↓', kb:['↓'] },
+      { a:'道具选择模式（长按）/ 重置视角', g:'L1 / LB（长按）', k:'Ctrl', kb:['Ctrl'], u:1 },
+      { a:'道具选择模式时：自定义快捷方式', g:'—', k:'鼠标左键', kb:['左键'] },
+      { a:'道具选择模式时：快捷盘移动', g:'—', k:'鼠标中键', kb:['中键'] },
+      { a:'道具选择模式时：道具栏全展开', g:'—', k:'空格', kb:['空格'] },
+      { a:'显示自定义快捷方式', g:'—', k:'V', kb:['V'] },
+      { a:'自定义快捷方式：快捷盘移动（上）', g:'—', k:'鼠标滚轮上滑 / ↑', kb:['滚轮上','↑'] },
+      { a:'自定义快捷方式：快捷盘移动（下）', g:'—', k:'鼠标滚轮下滑 / ↓', kb:['滚轮下','↓'] },
+      { a:'调用快捷盘 1', g:'—', k:'F1', kb:['F1'] },
+      { a:'调用快捷盘 2', g:'—', k:'F2', kb:['F2'] },
+      { a:'调用快捷盘 3', g:'—', k:'F3', kb:['F3'] },
+      { a:'调用快捷盘 4', g:'—', k:'F4', kb:['F4'] },
+      { a:'调用快捷盘 5', g:'—', k:'F5', kb:['F5'] },
+      { a:'调用快捷盘 6', g:'—', k:'F6', kb:['F6'] },
+      { a:'调用快捷盘 7', g:'—', k:'F7', kb:['F7'] },
+      { a:'调用快捷盘 8', g:'—', k:'F8', kb:['F8'] },
+      { a:'切换至下一个快捷盘', g:'—', k:'G', kb:['G'] },
+      { a:'键盘专用快捷方式：栏位 1', g:'—', k:'1', kb:['1'] },
+      { a:'键盘专用快捷方式：栏位 2', g:'—', k:'2', kb:['2'] },
+      { a:'键盘专用快捷方式：栏位 3', g:'—', k:'3', kb:['3'] },
+      { a:'键盘专用快捷方式：栏位 4', g:'—', k:'4', kb:['4'] },
+      { a:'键盘专用快捷方式：栏位 5', g:'—', k:'5', kb:['5'] },
+      { a:'键盘专用快捷方式：栏位 6', g:'—', k:'6', kb:['6'] },
+      { a:'键盘专用快捷方式：栏位 7', g:'—', k:'7', kb:['7'] },
+      { a:'键盘专用快捷方式：栏位 8', g:'—', k:'8', kb:['8'] },
+      { a:'键盘专用快捷方式：栏位 9', g:'—', k:'9', kb:['9'] },
+      { a:'键盘专用快捷方式：栏位 10', g:'—', k:'0', kb:['0'] },
+      { a:'键盘专用快捷方式：栏位 11', g:'—', k:'-', kb:['-'] },
+      { a:'键盘专用快捷方式：栏位 12', g:'—', k:'=', kb:['='] }
+    ]},
+    { cat:'camera', name:'视角 · 望远镜 · 拍照', rows:[
+      { a:'锁定 / 切换至目标视角', g:'R3 / 右摇杆按下', k:'B', kb:['B'], u:1 },
+      { a:'望远镜 / 拍照模式：放大', g:'—', k:'C / 鼠标滚轮上滑', kb:['C','滚轮上'] },
+      { a:'望远镜 / 拍照模式：缩小', g:'—', k:'Z / 鼠标滚轮下滑', kb:['Z','滚轮下'] },
+      { a:'拍照模式：移动镜头', g:'左摇杆', k:'W / S / A / D', kb:['W','S','A','D'] },
+      { a:'拍照模式：调整相机位置（上/下/左/右）', g:'右摇杆', k:'↑ / ↓ / ← / →', kb:['↑','↓','←','→'] },
+      { a:'开启拍照模式', g:'—', k:'Ctrl', kb:['Ctrl'] }
+    ]},
+    { cat:'online', name:'联机 · 交流 · 信息', rows:[
+      { a:'聊天发言', g:'—', k:'Enter', kb:['Enter'] },
+      { a:'即按即说', g:'—', k:'T', kb:['T'] },
+      { a:'贴图', g:'—', k:'F9', kb:['F9'] },
+      { a:'肢体动作', g:'—', k:'F10', kb:['F10'] },
+      { a:'姿势组合', g:'—', k:'F11', kb:['F11'] },
+      { a:'成员列表', g:'—', k:'L', kb:['L'] },
+      { a:'打开地图', g:'触摸板 / View', k:'M', kb:['M'] },
+      { a:'打开聊天通知或任务准备画面 / 跳过任务相关项', g:'—', k:'Y', kb:['Y'] },
+      { a:'查看道具袋', g:'—', k:'I', kb:['I'] },
+      { a:'使命信息界面', g:'—', k:'J', kb:['J'] },
+      { a:'猎人资料', g:'—', k:'P', kb:['P'] },
+      { a:'暂停游戏', g:'—', k:'End', kb:['End'] },
+      { a:'选项', g:'—', k:'O', kb:['O'] },
+      { a:'发出救难信号', g:'—', k:'未分配（默认无键位）', kb:[] },
+      { a:'邀请通知列表 / 离席通知 / 聊天分组（大厅·连结·任务·小队·特定玩家）', g:'—', k:'未分配（默认无键位）', kb:[] },
+      { a:'查看弹药袋 / 瓶袋 / 装备一览 / 登记道具快捷方式 / 重新挑战使命 / 任务信息', g:'—', k:'未分配（默认无键位）', kb:[] },
+      { a:'参加任务申请 / 支援猎人信息 / 结算记录 / 随从信息 / 愿望单 / 从列表调合 / 打开全局地图', g:'—', k:'未分配（默认无键位）', kb:[] }
+    ]}
+  ],
+  world: [
+    { cat:'menu', name:'菜单操作（冰原 Type 1）', rows:[
+      { a:'选择菜单项目 / 增加数值', g:'方向键 ↑', k:'W', s:'↑', kb:['W','↑'] },
+      { a:'选择菜单项目 / 减少数值', g:'方向键 ↓', k:'S', s:'↓', kb:['S','↓'] },
+      { a:'选择菜单项目（左）', g:'方向键 ←', k:'A', s:'←', kb:['A','←'] },
+      { a:'选择菜单项目（右）', g:'方向键 →', k:'D', s:'→', kb:['D','→'] },
+      { a:'确定', g:'✕ / A', k:'F', s:'空格', kb:['F','空格'] },
+      { a:'返回 / 取消', g:'○ / B', k:'鼠标右键', kb:['右键'] },
+      { a:'补给（补充道具）', g:'—', k:'R', kb:['R'] },
+      { a:'切换页面（左）', g:'L1 / LB', k:'Q', kb:['Q'] },
+      { a:'切换页面（右）', g:'R1 / RB', k:'E', kb:['E'] },
+      { a:'切换分页 / 状态（左）', g:'—', k:'Z', kb:['Z'] },
+      { a:'切换分页 / 状态（右）', g:'—', k:'C', kb:['C'] },
+      { a:'向左旋转模型', g:'—', k:'1', s:'鼠标侧键2', kb:['1','侧键2'] },
+      { a:'向右旋转模型', g:'—', k:'3', s:'鼠标侧键1', kb:['3','侧键1'] },
+      { a:'放大', g:'—', k:'鼠标中键上滚', kb:['滚轮上'] },
+      { a:'缩小', g:'—', k:'鼠标中键下滚', kb:['滚轮下'] },
+      { a:'切换生态地图 / 世界地图', g:'—', k:'N', kb:['N'] },
+      { a:'使用 / 登记个人组合 · 取消动画', g:'—', k:'X', kb:['X'] },
+      { a:'即按即说', g:'—', k:'T', kb:['T'] }
+    ]},
+    { cat:'menu', name:'道具箱菜单', rows:[
+      { a:'切换（道具袋 ⇄ 箱子）', g:'—', k:'F', kb:['F'] },
+      { a:'整理', g:'—', k:'N', kb:['N'] },
+      { a:'补给', g:'—', k:'R', kb:['R'] },
+      { a:'返回', g:'○ / B', k:'鼠标右键', kb:['右键'] },
+      { a:'自动整理', g:'—', k:'Tab', kb:['Tab'] },
+      { a:'从道具袋移到箱子', g:'—', k:'Shift', kb:['Shift'] },
+      { a:'取出', g:'—', k:'Q', s:'Z', kb:['Q','Z'] },
+      { a:'存放', g:'—', k:'E', s:'C', kb:['E','C'] }
+    ]},
+    { cat:'menu', name:'更换装备菜单', rows:[
+      { a:'管理个人组合', g:'—', k:'X', kb:['X'] },
+      { a:'确定', g:'✕ / A', k:'F', kb:['F'] },
+      { a:'返回', g:'○ / B', k:'鼠标右键', kb:['右键'] },
+      { a:'向左旋转模型', g:'—', k:'1', kb:['1'] },
+      { a:'向右旋转模型', g:'—', k:'3', kb:['3'] },
+      { a:'技能信息', g:'—', k:'Ctrl', kb:['Ctrl'] },
+      { a:'比较', g:'—', k:'Shift', kb:['Shift'] }
+    ]},
+    { cat:'combat', name:'战斗 · 移动（近战武器）', rows:[
+      { a:'移动', g:'左摇杆', k:'W / A / S / D', kb:['W','A','S','D'] },
+      { a:'聚焦镜头 / 选择目标 / 切换投射器瞄准', g:'L1 / LB', k:'Q', kb:['Q'] },
+      { a:'冲刺（长按）/ 收刀', g:'R1 / RB', k:'Shift', kb:['Shift'] },
+      { a:'冲刺（按一次）/ 收刀', g:'R1 / RB', k:'Shift', kb:['Shift'], u:1, n:'另有资料列出次要键 B' },
+      { a:'蹲下 / 闪避', g:'✕ / A', k:'空格', kb:['空格'] },
+      { a:'互动 / 对话 / 采集 / 剥取', g:'○ / B（纳刀时）', k:'F', kb:['F'] },
+      { a:'打开开始菜单', g:'选项键 / Menu', k:'ESC', s:'H', kb:['Esc','H'] },
+      { a:'生态地图', g:'触摸板 / View', k:'M', kb:['M'] },
+      { a:'显示聊天窗口', g:'—', k:'Enter', kb:['Enter'] },
+      { a:'随从 / 调查组指令', g:'—', k:'F8', kb:['F8'] },
+      { a:'普通攻击', g:'△ / Y', k:'鼠标左键', kb:['左键'] },
+      { a:'特殊攻击（拔刀时）/ 发射钩爪', g:'○ / B', k:'鼠标右键', kb:['右键'] },
+      { a:'防御 / 武器特殊动作 / 发射钩爪', g:'R2 / RT', k:'鼠标侧键2（MB5）', kb:['侧键2'], u:1, n:'本篇首发版默认曾为 Ctrl；冰原改为 MB5' },
+      { a:'显示武器或投射器准星（按一次）', g:'L2 / LT', k:'鼠标中键', kb:['中键'] },
+      { a:'显示武器或投射器准星（长按）', g:'L2 / LT（长按）', k:'C', kb:['C'], u:1, n:'本篇首发版默认为 V（长按）/ C（按一次）' },
+      { a:'同时按下动作', g:'△+○ / Y+B', k:'鼠标侧键1（MB4）', kb:['侧键1'] },
+      { a:'使用道具 / 收刀', g:'□ / X', k:'E', kb:['E'] },
+      { a:'显示道具（长按）/ 重置镜头', g:'—', k:'Ctrl', s:'Alt', kb:['Ctrl','Alt'] },
+      { a:'显示道具时：切换道具 左', g:'—', k:'鼠标中键上滚', kb:['滚轮上'] },
+      { a:'显示道具时：切换道具 右', g:'—', k:'鼠标中键下滚', kb:['滚轮下'] },
+      { a:'显示道具时：切换瓶 上', g:'—', k:'↑', kb:['↑'] },
+      { a:'显示道具时：切换瓶 下', g:'—', k:'↓', kb:['↓'] },
+      { a:'切换道具 左', g:'方向键 ←', k:'鼠标中键上滚 / ←', kb:['滚轮上','←'] },
+      { a:'切换道具 右', g:'方向键 →', k:'鼠标中键下滚 / →', kb:['滚轮下','→'] },
+      { a:'切换弹药 / 瓶 上', g:'方向键 ↑', k:'↑', kb:['↑'] },
+      { a:'切换弹药 / 瓶 下', g:'方向键 ↓', k:'↓', kb:['↓'] },
+      { a:'镜头上移', g:'右摇杆', k:'O', kb:['O'] },
+      { a:'镜头左移', g:'右摇杆', k:'K', kb:['K'] },
+      { a:'镜头下移', g:'右摇杆', k:'L', kb:['L'] },
+      { a:'镜头右移', g:'右摇杆', k:';', kb:[';'] }
+    ]},
+    { cat:'combat', name:'战斗 · 移动（远程武器：弓 / 轻弩 / 重弩）', rows:[
+      { a:'移动', g:'左摇杆', k:'W / A / S / D', kb:['W','A','S','D'] },
+      { a:'聚焦镜头 / 选择目标', g:'L1 / LB', k:'Q', kb:['Q'] },
+      { a:'冲刺（长按）/ 收刀', g:'R1 / RB', k:'Shift', kb:['Shift'] },
+      { a:'蹲下 / 闪避', g:'✕ / A', k:'空格', kb:['空格'] },
+      { a:'互动 / 对话 / 采集 / 剥取', g:'○ / B', k:'F', kb:['F'] },
+      { a:'拔刀 / 射击', g:'R2 / RT', k:'鼠标左键', kb:['左键'] },
+      { a:'特殊攻击（拔刀时）/ 发射钩爪', g:'○ / B', k:'鼠标侧键2（MB5）', kb:['侧键2'] },
+      { a:'装填 / 上瓶 · 卸瓶', g:'△ / Y', k:'鼠标侧键1（MB4）', kb:['侧键1'], u:1, n:'本篇首发版弓的上瓶为 R' },
+      { a:'显示武器或投射器准星（长按）', g:'L2 / LT（长按）', k:'鼠标右键', kb:['右键'] },
+      { a:'近战攻击 / 同时按下动作', g:'—', k:'C', kb:['C'] },
+      { a:'使用道具 / 收刀', g:'□ / X', k:'E', kb:['E'] },
+      { a:'显示道具（长按）/ 重置镜头', g:'—', k:'Ctrl', s:'Alt', kb:['Ctrl','Alt'] },
+      { a:'切换弹药 / 瓶 上', g:'方向键 ↑', k:'鼠标中键上滚 / ↑', kb:['滚轮上','↑'] },
+      { a:'切换弹药 / 瓶 下', g:'方向键 ↓', k:'鼠标中键下滚 / ↓', kb:['滚轮下','↓'] },
+      { a:'切换道具 左', g:'方向键 ←', k:'←', kb:['←'] },
+      { a:'切换道具 右', g:'方向键 →', k:'→', kb:['→'] }
+    ]},
+    { cat:'combat', name:'冰原 · 钩爪（Clutch Claw）', rows:[
+      { a:'投射器瞄准（长按）', g:'L2 / LT（长按）', k:'C（近战）/ 鼠标右键（远程）', kb:['C','右键'] },
+      { a:'发射钩爪', g:'○ / B', k:'鼠标右键（近战）/ 鼠标侧键2（远程）', kb:['右键','侧键2'], u:1 },
+      { a:'钩爪上身后：钩爪攻击（软化）', g:'△ / Y', k:'鼠标左键', kb:['左键'] },
+      { a:'钩爪上身后：转向（撞墙）', g:'○ / B', k:'鼠标右键', kb:['右键'], u:1 },
+      { a:'钩爪上身后：全弹发射（怪物冲撞）', g:'R2 / RT', k:'鼠标侧键2（MB5）', kb:['侧键2'], u:1 },
+      { a:'钩爪上身后：跳下', g:'✕ / A', k:'空格', kb:['空格'] }
+    ]},
+    { cat:'item', name:'道具 · 快捷轮盘', rows:[
+      { a:'快捷轮盘 1', g:'L1 / LB + 方向键', k:'F1', kb:['F1'] },
+      { a:'快捷轮盘 2', g:'L1 / LB + 方向键', k:'F2', kb:['F2'] },
+      { a:'快捷轮盘 3', g:'L1 / LB + 方向键', k:'F3', kb:['F3'] },
+      { a:'快捷轮盘 4', g:'L1 / LB + 方向键', k:'F4', kb:['F4'] },
+      { a:'切换轮盘', g:'—', k:'G', kb:['G'] },
+      { a:'键盘专用快捷方式：栏位 1', g:'—', k:'1', kb:['1'], n:'需将「快捷栏类型」设为键盘用' },
+      { a:'键盘专用快捷方式：栏位 2', g:'—', k:'2', kb:['2'] },
+      { a:'键盘专用快捷方式：栏位 3', g:'—', k:'3', kb:['3'] },
+      { a:'键盘专用快捷方式：栏位 4', g:'—', k:'4', kb:['4'] },
+      { a:'键盘专用快捷方式：栏位 5', g:'—', k:'5', kb:['5'] },
+      { a:'键盘专用快捷方式：栏位 6', g:'—', k:'6', kb:['6'] },
+      { a:'键盘专用快捷方式：栏位 7', g:'—', k:'7', kb:['7'] },
+      { a:'键盘专用快捷方式：栏位 8', g:'—', k:'8', kb:['8'] }
+    ]}
+  ]
+};
+
+/* =========================================================
+   基础映射卡
+   ========================================================= */
+const BASE = {
+  wilds: { cls:'melee', rows:[
+    { lbl:'拔刀 / 普通攻击', tk:'t' }, { lbl:'特殊攻击（拔刀后）', tk:'c' },
+    { lbl:'防御 / 武器特殊动作', tk:'r2' }, { lbl:'回避 / 下蹲', tk:'x' },
+    { lbl:'使用道具 / 纳刀', tk:'s' }, { lbl:'冲刺 / 纳刀', tk:'r1' },
+    { lbl:'集中模式 / 瞄准', tk:'l2' }, { lbl:'同时按下动作 △+○', tk:'tc' },
+    { lbl:'道具快捷栏（长按）', tk:'l1' }, { lbl:'锁定目标', tk:'r3' }
+  ], note:'<b>荒野要点：</b>△/○/✕/□ 分别是 <b>鼠标左键 / 鼠标右键 / 空格 / E</b>；R2→<b>R</b>，R1→<b>Shift</b>，L2→<b>Alt（按一次切换）</b>或<b>鼠标侧键2（长按）</b>，△+○ 同时按下 →<b>鼠标侧键1</b>。远程武器下按键语义会变：R2 = 射击（鼠标左键），△ = 装填（R）。'},
+  world: { cls:'melee', rows:[
+    { lbl:'普通攻击', tk:'t' }, { lbl:'特殊攻击', tk:'c' },
+    { lbl:'防御 / 武器特殊动作', tk:'r2' }, { lbl:'闪避 / 蹲下', tk:'x' },
+    { lbl:'使用道具 / 收刀', tk:'s' }, { lbl:'冲刺（长按）/ 收刀', tk:'r1' },
+    { lbl:'投射器 / 武器瞄准', tk:'l2' }, { lbl:'同时按下动作 △+○', tk:'tc' },
+    { lbl:'聚焦镜头 / 选择目标', tk:'l1' }
+  ], note:'<b>世界（含冰原）要点：</b>△→鼠标左键、○→鼠标右键、✕→空格、□→E、R1→Shift。冰原采用 <b>Type 1</b> 键位并大量使用鼠标侧键：R2→<b>鼠标侧键2（MB5）</b>、△+○→<b>鼠标侧键1（MB4）</b>、L2 长按→<b>C</b>。<b>本篇首发版（2018）默认值不同</b>：R2 = <b>Ctrl</b>、L2 = <b>V（长按）/ C（按一次）</b>、弓的上瓶 = <b>R</b>。远程武器下：R2 = 射击（鼠标左键）、△ = 装填（MB4）、○ = 特殊攻击（MB5）、L2 = 瞄准（长按鼠标右键）。'}
+};
+
+/* =========================================================
+   武器数据（in = 手柄令牌组合）
+   ========================================================= */
+const WEAPONS = [
+{ id:'gs', name:'大剑', en:'Great Sword', cls:'melee', ic:'🗡',
+  groups:[
+    { title:'按键语义', rows:[
+      { a:'△ / Y — 纵斩 · 横斩 · 上捞斩等普通斩击', in:'t' },
+      { a:'○ / B — 蓄力系起手（长按蓄力）', in:'c', hold:1, u:1 },
+      { a:'R2 / RT — 防御', in:'r2' },
+      { a:'✕ / A — 回避 / 翻滚', in:'x' }
+    ]},
+    { title:'核心招式', rows:[
+      { a:'纵斩 → 横斩（连段）', in:'t+t' },
+      { a:'上捞斩', in:'tc', u:1 },
+      { a:'蓄力斩（长按蓄力，松开释放）', in:'c', hold:1, u:1, n:'分三段：蓄力斩 → 强蓄力斩 → 真·蓄力斩' },
+      { a:'肩撞（蓄力中派生，可衔接）', in:'c+x', u:1 },
+      { a:'防御', in:'r2', hold:1 },
+      { a:'集中弱点攻击（集中模式 L2 中）', in:'r1', u:1, only:'wilds' }
+    ]},
+    { title:'键鼠要点', rows:[
+      { a:'蓄力 = 长按鼠标右键', in:'c', hold:1, u:1 },
+      { a:'防御 = R（荒野）/ 鼠标侧键2 MB5（世界冰原）', in:'r2' }
+    ]}
+  ]},
+{ id:'ls', name:'太刀', en:'Long Sword', cls:'melee', ic:'⚔',
+  groups:[
+    { title:'按键语义', rows:[
+      { a:'△ / Y — 踏步斩等基础连段', in:'t' },
+      { a:'○ / B — 突刺 / 回旋系', in:'c' },
+      { a:'R2 / RT — 气刃斩（消耗练气槽）', in:'r2' },
+      { a:'✕ / A — 回避 / 见切位移', in:'x' }
+    ]},
+    { title:'核心招式', rows:[
+      { a:'基础连段（踏步斩 → 突刺）', in:'t+c' },
+      { a:'气刃斩（积攒 / 消耗练气槽）', in:'r2' },
+      { a:'气刃大回旋（开刃，提升练气等级）', in:'r2', u:1, n:'气刃斩连段末尾派生' },
+      { a:'见切斩（迎击反击）', in:'r2+c', u:1 },
+      { a:'特殊纳刀 → 居合拔刀斩', in:'r2+x', u:1, n:'居合斩需在特殊纳刀后按 △' },
+      { a:'集中弱点攻击（集中模式 L2 中）', in:'r1', u:1, only:'wilds' }
+    ]},
+    { title:'键鼠要点', rows:[
+      { a:'气刃斩 = R（荒野）/ 鼠标侧键2 MB5（世界冰原）', in:'r2' },
+      { a:'世界首发版中 R2 为 Ctrl，是太刀最常被改键的一个', in:'r2', u:1 }
+    ]}
+  ]},
+{ id:'sns', name:'片手剑', en:'Sword & Shield', cls:'melee', ic:'🛡',
+  groups:[
+    { title:'按键语义', rows:[
+      { a:'△ / Y — 纵斩 / 横斩 / 盾连斩', in:'t' },
+      { a:'○ / B — 水平斩 / 回斩 / 回旋斩', in:'c' },
+      { a:'□ / X — 持刀使用道具（无需收刀）', in:'s' },
+      { a:'R2 / RT — 防御 / 盾击', in:'r2' }
+    ]},
+    { title:'核心招式', rows:[
+      { a:'纵斩 → 横斩 → 盾连斩', in:'t+t+t' },
+      { a:'水平斩 → 回斩 → 回旋斩', in:'c+c+c' },
+      { a:'后撤步蓄力斩（左摇杆后 + ○ 长按）', in:'ls+c', hold:1, u:1 },
+      { a:'上撩跳斩（蓄力斩命中后自动派生）', in:'c', u:1 },
+      { a:'真回旋斩（△+○，可 360° 选方位）', in:'tc', u:1 },
+      { a:'持刀使用道具（片手剑独有优势）', in:'s' }
+    ]},
+    { title:'键鼠要点', rows:[
+      { a:'持刀喝药 = E（无需先收刀）', in:'s' },
+      { a:'方向 + 攻击键决定派生', in:'t', n:'配合 WASD 使用' }
+    ]}
+  ]},
+{ id:'db', name:'双剑', en:'Dual Blades', cls:'melee', ic:'⚔',
+  groups:[
+    { title:'按键语义', rows:[
+      { a:'△ / Y — 连斩', in:'t' },
+      { a:'○ / B — 回旋斩 / 突进斩', in:'c' },
+      { a:'R2 / RT — 鬼人化（消耗耐力换攻速）', in:'r2' },
+      { a:'✕ / A — 滑步 / 鬼人滑步', in:'x' }
+    ]},
+    { title:'核心招式', rows:[
+      { a:'鬼人化（进入 / 解除）', in:'r2' },
+      { a:'鬼人化中：鬼人连斩', in:'t', u:1 },
+      { a:'鬼人乱舞（△+○）', in:'tc', u:1 },
+      { a:'鬼人滑步（回避接攻击）', in:'x' },
+      { a:'空中回旋乱舞（跳跃后）', in:'t', u:1 },
+      { a:'集中弱点攻击（集中模式 L2 中）', in:'r1', u:1, only:'wilds' }
+    ]},
+    { title:'键鼠要点', rows:[
+      { a:'鬼人化 = R（荒野）/ 鼠标侧键2 MB5（世界冰原）', in:'r2' },
+      { a:'耐力管理是双剑核心，鬼人化中持续消耗耐力', in:'r2', n:'耐力见底会自动解除' }
+    ]}
+  ]},
+{ id:'hm', name:'大锤', en:'Hammer', cls:'melee', ic:'🔨',
+  groups:[
+    { title:'按键语义', rows:[
+      { a:'△ / Y — 纵挥 / 五连敲', in:'t' },
+      { a:'○ / B — 纵挥三连击', in:'c' },
+      { a:'R2 / RT — 蓄力（长按）', in:'r2', hold:1, u:1 },
+      { a:'✕ / A — 回避', in:'x' }
+    ]},
+    { title:'核心招式', rows:[
+      { a:'纵挥三连击', in:'c+c+c' },
+      { a:'五连敲', in:'t', u:1 },
+      { a:'蓄力（长按，分阶段）', in:'r2', hold:1, u:1, n:'3DM 资料确认 R2 = 蓄力；荒野 beta 另有资料写作 Ctrl' },
+      { a:'强蓄力（R2 + ○）', in:'r2+c', u:1 },
+      { a:'旋转攻击（蓄力 3 段后派生）', in:'t', u:1 },
+      { a:'本垒打（连招收尾高威力）', in:'tc', u:1 }
+    ]},
+    { title:'键鼠要点', rows:[
+      { a:'蓄力 = R（荒野）/ 鼠标侧键2 MB5（世界冰原）', in:'r2', hold:1, u:1 },
+      { a:'打击属性主打头部，可积累眩晕值', in:'t', n:'与键位无关，属操作思路' }
+    ]}
+  ]},
+{ id:'hh', name:'狩猎笛', en:'Hunting Horn', cls:'melee', ic:'🎵',
+  groups:[
+    { title:'按键语义', rows:[
+      { a:'△ / Y — 前方攻击 / 音色（左）', in:'t' },
+      { a:'○ / B — 后方攻击 / 音色（右）', in:'c' },
+      { a:'R2 / RT — 演奏（发动旋律效果）', in:'r2' },
+      { a:'✕ / A — 回避', in:'x' }
+    ]},
+    { title:'核心招式', rows:[
+      { a:'攻击积攒旋律（不同键位对应不同音色）', in:'t' },
+      { a:'演奏（发动已积攒的旋律）', in:'r2', n:'3DM 资料确认笛子演奏为 R2；方向 + R2 可派生带位移的演奏' },
+      { a:'方向演奏（左摇杆方向 + R2）', in:'ls+r2', u:1 },
+      { a:'音色切换 / 三音演奏', in:'tc', u:1 },
+      { a:'集中弱点攻击（集中模式 L2 中）', in:'r1', u:1, only:'wilds' }
+    ]},
+    { title:'键鼠要点', rows:[
+      { a:'演奏 = R（荒野）/ 鼠标侧键2 MB5（世界冰原）', in:'r2' },
+      { a:'建议为演奏设置第二键位（如鼠标中键），避免方向 + R 同时按', in:'r2', n:'3DM 改键建议' }
+    ]}
+  ]},
+{ id:'ln', name:'长枪', en:'Lance', cls:'melee', ic:'🔱',
+  groups:[
+    { title:'按键语义', rows:[
+      { a:'△ / Y — 上段突刺', in:'t' },
+      { a:'○ / B — 中段突刺', in:'c' },
+      { a:'R2 / RT — 防御', in:'r2' },
+      { a:'✕ / A — 后跳 / 回避', in:'x' }
+    ]},
+    { title:'核心招式', rows:[
+      { a:'三连突刺', in:'t+t+t' },
+      { a:'防御（长按）', in:'r2', hold:1 },
+      { a:'防反（防御反击刺，R2 + ○）', in:'r2+c', n:'3DM 资料确认 R2+○ 为防反' },
+      { a:'力量防御（R2 + ✕）', in:'r2+x', u:1 },
+      { a:'冲撞 / 跳跃突刺', in:'r2+t', u:1 },
+      { a:'集中弱点攻击（集中模式 L2 中）', in:'r1', u:1, only:'wilds' }
+    ]},
+    { title:'键鼠要点', rows:[
+      { a:'防御 = R（荒野）/ 鼠标侧键2 MB5（世界冰原）', in:'r2', hold:1 },
+      { a:'长枪极度依赖 R2，建议为其设置靠近 WASD 的第二键位', in:'r2', n:'3DM 改键建议' }
+    ]}
+  ]},
+{ id:'gl', name:'铳枪', en:'Gunlance', cls:'melee', ic:'💥',
+  groups:[
+    { title:'按键语义', rows:[
+      { a:'△ / Y — 刺击 / 防御刺（配合 R2）', in:'t' },
+      { a:'○ / B — 炮击（长按为蓄力炮）', in:'c' },
+      { a:'R2 / RT — 防御', in:'r2' },
+      { a:'✕ / A — 回避 / 后跳', in:'x' }
+    ]},
+    { title:'核心招式', rows:[
+      { a:'防御刺（R2 + △）→ 可连打三下', in:'r2+t', n:'游民星空 PC 键鼠教学确认：防御刺 (R+左键) ×3' },
+      { a:'上捞斩（△+○ 或鼠标侧键1）', in:'tc', n:'游民星空教学确认：上捞 = 左键+右键 / 上侧键' },
+      { a:'炮击（○）', in:'c', n:'游民星空教学确认：炮击 (右键)' },
+      { a:'蓄力炮（长按 ○）', in:'c', hold:1, n:'游民星空教学确认：蓄力炮 (右键按紧)' },
+      { a:'移动炮击（方向 + ○）', in:'ls+c', n:'游民星空教学确认：移动炮击 (WASD+右键)' },
+      { a:'快速装填（R2 + ○）', in:'r2+c', n:'游民星空教学确认：快填 (R+右键)' },
+      { a:'龙击炮（△+○ 长按 / 全套派生）', in:'tc', u:1 },
+      { a:'集中弱点攻击（集中模式 L2 中）', in:'r1', u:1, only:'wilds' }
+    ]},
+    { title:'键鼠要点', rows:[
+      { a:'防御 = R，炮击 = 鼠标右键，快填 = R + 鼠标右键（荒野）', in:'r2+c' },
+      { a:'世界冰原：防御 = MB5，炮击 = 鼠标右键，快填 = MB5 + 鼠标右键', in:'r2+c' }
+    ]}
+  ]},
+{ id:'sa', name:'斩击斧', en:'Switch Axe', cls:'melee', ic:'🪓',
+  groups:[
+    { title:'按键语义', rows:[
+      { a:'△ / Y — 斧模式纵斩 / 剑模式连击', in:'t' },
+      { a:'○ / B — 横斩 / 侧斩', in:'c' },
+      { a:'R2 / RT — 变形（剑 ⇄ 斧）', in:'r2' },
+      { a:'✕ / A — 回避 / 滑步', in:'x' }
+    ]},
+    { title:'核心招式', rows:[
+      { a:'斧模式：纵斩 → 横斩', in:'t+c' },
+      { a:'剑模式：连击（消耗槽）', in:'t', u:1 },
+      { a:'变形斩（R2）', in:'r2' },
+      { a:'属性解放突刺（剑模式 △+○ 长按）', in:'tc', hold:1, u:1 },
+      { a:'属性解放终结（高出力）', in:'tc', u:1 },
+      { a:'装填（剑槽耗尽时）', in:'r2+c', u:1 },
+      { a:'集中弱点攻击（集中模式 L2 中）', in:'r1', u:1, only:'wilds' }
+    ]},
+    { title:'键鼠要点', rows:[
+      { a:'变形 = R（荒野）/ 鼠标侧键2 MB5（世界冰原）', in:'r2' },
+      { a:'属性解放突刺为 △+○，键鼠上是鼠标侧键1（荒野）/ MB4（世界）', in:'tc' }
+    ]}
+  ]},
+{ id:'cb', name:'盾斧 / 充能斧', en:'Charge Blade', cls:'melee', ic:'🛡',
+  groups:[
+    { title:'按键语义', rows:[
+      { a:'△ / Y — 剑模式攻击（积攒能量）', in:'t' },
+      { a:'○ / B — 斧模式攻击', in:'c' },
+      { a:'R2 / RT — 防御 / 变形', in:'r2' },
+      { a:'△+○ / Y+B — 盾突（剑模式突进）', in:'tc' }
+    ]},
+    { title:'核心招式', rows:[
+      { a:'剑模式：连击积攒瓶能量', in:'t' },
+      { a:'剑：盾突刺（△+○，可连打三段）', in:'tc', n:'游侠网资料确认：左键+右键 = 盾突刺' },
+      { a:'剑：防御（按住 R2，抓准时机触发精准防御）', in:'r2', hold:1, n:'游侠网资料确认：按住 R 防御' },
+      { a:'精准防御后：△ 派生属性回填斧强化', in:'t', u:1 },
+      { a:'瓶装填 / 属性强化（R2 + ○）', in:'r2+c', u:1 },
+      { a:'变形为斧模式（R2 + △）', in:'r2+t', u:1 },
+      { a:'斧：高出力属性解放斩（△+○）', in:'tc', u:1 },
+      { a:'超高出力属性解放斩（最高爆发）', in:'tc', hold:1, u:1 },
+      { a:'集中弱点攻击（集中模式 L2 中）', in:'r1', u:1, only:'wilds' }
+    ]},
+    { title:'键鼠要点', rows:[
+      { a:'盾突 = 鼠标侧键1（荒野）/ MB4（世界冰原）', in:'tc' },
+      { a:'防御 = R（荒野）/ MB5（世界冰原），盾斧需长时间长按，改键优先级最高', in:'r2', hold:1 }
+    ]}
+  ]},
+{ id:'ig', name:'操虫棍', en:'Insect Glaive', cls:'melee', ic:'🦟',
+  groups:[
+    { title:'按键语义', rows:[
+      { a:'△ / Y — 地面连击', in:'t' },
+      { a:'○ / B — 回避斩 / 跳跃攻击', in:'c' },
+      { a:'R2 / RT — 撑杆跳（配合 ✕）', in:'r2' },
+      { a:'L2 / LT — 猎虫瞄准', in:'l2' },
+      { a:'✕ / A — 跳跃 / 回避', in:'x' }
+    ]},
+    { title:'核心招式', rows:[
+      { a:'猎虫瞄准（长按）', in:'l2', hold:1, n:'3DM 资料确认：棍子常用 L2 瞄准射虫' },
+      { a:'发射猎虫（瞄准中 △）', in:'l2+t', n:'3DM 资料确认：瞄准 + 左键 = 射虫子' },
+      { a:'收回猎虫（瞄准中 ○）', in:'l2+c', n:'3DM 资料确认：瞄准 + 右键 = 收回虫子' },
+      { a:'撑杆跳（R2 + ✕）', in:'r2+x', n:'3DM 资料确认：R2+X 撑杆跳，键鼠为 Ctrl+空格（首发版）' },
+      { a:'跳跃攻击（空中 △ / ○）', in:'t', u:1 },
+      { a:'急袭斩（三灯状态）', in:'t', u:1, only:'wilds' },
+      { a:'飞天螺旋斩（急袭斩后 L2 + ○，清空精华）', in:'l2+c', u:1, only:'wilds', n:'游民星空资料：三灯 + 急袭斩后 L2+○ 派生' },
+      { a:'集中弱点攻击（集中模式 L2 中）', in:'r1', u:1, only:'wilds' }
+    ]},
+    { title:'键鼠要点', rows:[
+      { a:'猎虫瞄准 = Alt / 鼠标侧键2（荒野）；= C 长按 / 鼠标中键（世界冰原）', in:'l2' },
+      { a:'世界首发版 L2 = V，被认为极难用，是虫棍玩家必改的键', in:'l2', n:'3DM 改键建议：将 V 与 E 对调' },
+      { a:'撑杆跳 = R + 空格（荒野）/ MB5 + 空格（世界冰原）', in:'r2+x' }
+    ]}
+  ]},
+{ id:'lbg', name:'轻弩', en:'Light Bowgun', cls:'ranged', ic:'🎯',
+  groups:[
+    { title:'按键语义', rows:[
+      { a:'R2 / RT — 拔刀 / 射击', in:'r2' },
+      { a:'△ / Y — 装填', in:'t' },
+      { a:'○ / B — 特殊弹 / 起爆龙弹', in:'c' },
+      { a:'L2 / LT — 瞄准（长按）', in:'l2', hold:1 },
+      { a:'✕ / A — 回避 / 滑步', in:'x' }
+    ]},
+    { title:'核心招式', rows:[
+      { a:'射击', in:'r2' },
+      { a:'瞄准（长按）', in:'l2', hold:1 },
+      { a:'装填（△）', in:'t', u:1 },
+      { a:'起爆龙弹 / 特殊弹设置（○）', in:'c', u:1 },
+      { a:'切换弹种（↑ / ↓）', in:'dp', n:'键盘为鼠标滚轮或 ↑↓' },
+      { a:'滑步回避（装填后位移）', in:'x', u:1 },
+      { a:'集中弱点攻击（集中模式 L2 中）', in:'r1', u:1, only:'wilds' }
+    ]},
+    { title:'键鼠要点', rows:[
+      { a:'荒野：射击 = 鼠标左键，装填 = R，瞄准 = Alt / 侧键2', in:'r2' },
+      { a:'世界冰原：射击 = 鼠标左键，装填 = MB4，特殊弹 = MB5，瞄准 = 长按鼠标右键', in:'r2' },
+      { a:'3DM 改键建议：把瞄准（V）改到鼠标右键，起爆龙弹改到鼠标中键', in:'l2', n:'世界首发版' }
+    ]}
+  ]},
+{ id:'hbg', name:'重弩', en:'Heavy Bowgun', cls:'ranged', ic:'💣',
+  groups:[
+    { title:'按键语义', rows:[
+      { a:'R2 / RT — 拔刀 / 射击', in:'r2' },
+      { a:'△ / Y — 装填', in:'t' },
+      { a:'○ / B — 特殊弹 / 机关龙弹等特制动作', in:'c' },
+      { a:'L2 / LT — 瞄准（长按）', in:'l2', hold:1 },
+      { a:'✕ / A — 回避（重弩位移较慢）', in:'x' }
+    ]},
+    { title:'核心招式', rows:[
+      { a:'射击', in:'r2' },
+      { a:'瞄准（长按）', in:'l2', hold:1 },
+      { a:'装填（△）', in:'t', u:1 },
+      { a:'机关龙弹 / 蹲射等特制装备动作', in:'c', u:1 },
+      { a:'切换弹种（↑ / ↓）', in:'dp' },
+      { a:'集中弱点攻击（集中模式 L2 中）', in:'r1', u:1, only:'wilds' }
+    ]},
+    { title:'键鼠要点', rows:[
+      { a:'荒野：射击 = 鼠标左键，装填 = R，瞄准 = Alt / 侧键2', in:'r2' },
+      { a:'世界冰原：射击 = 鼠标左键，装填 = MB4，特殊动作 = MB5，瞄准 = 长按鼠标右键', in:'r2' },
+      { a:'想用近战敲击时需 装填键 + 特殊动作键 组合', in:'t+c', u:1, n:'3DM 资料：ctrl+中键，首发版' }
+    ]}
+  ]},
+{ id:'bw', name:'弓', en:'Bow', cls:'ranged', ic:'🏹',
+  groups:[
+    { title:'按键语义', rows:[
+      { a:'R2 / RT — 射击 / 蓄力（长按）', in:'r2' },
+      { a:'△ / Y — 装填瓶 / 卸瓶', in:'t' },
+      { a:'○ / B — 刚射 / 曲射', in:'c' },
+      { a:'L2 / LT — 瞄准（长按）', in:'l2', hold:1 },
+      { a:'✕ / A — 滑步（配合方向）', in:'x' }
+    ]},
+    { title:'核心招式', rows:[
+      { a:'通常射击 / 蓄力射击（长按 R2）', in:'r2', hold:1 },
+      { a:'瞄准（长按 L2）', in:'l2', hold:1 },
+      { a:'刚射（○）', in:'c', u:1, n:'3DM 资料：默认刚射在 ○ 键，建议改到鼠标中键' },
+      { a:'龙之箭（龙之矢，瞄准中 R2 + ○）', in:'r2+c', u:1, n:'3DM 资料：ctrl+中键 = 龙之矢（改键后）' },
+      { a:'滑步（✕ + 方向，衔接蓄力等级）', in:'x' },
+      { a:'装填 / 卸瓶（△）', in:'t', u:1 },
+      { a:'曲射（○ 长按 / 特殊射法）', in:'c', hold:1, u:1 },
+      { a:'集中弱点攻击（集中模式 L2 中）', in:'r1', u:1, only:'wilds' }
+    ]},
+    { title:'键鼠要点', rows:[
+      { a:'荒野：射击·蓄力 = 鼠标左键，上瓶 = R，瞄准 = Alt / 侧键2', in:'r2' },
+      { a:'世界冰原：射击·蓄力 = 鼠标左键，上瓶 = MB4，刚射 = MB5，瞄准 = 长按鼠标右键', in:'r2' },
+      { a:'世界首发版：上瓶 = R，瞄准 = V（长按）/ C（按一次）', in:'l2', n:'3DM / 弓箭键位心得' }
+    ]}
+  ]}
+];
+
+window.MH_SOURCE = { general: GENERAL, weapons: WEAPONS };
+</script>
+<script src="mh-interface.js"></script>
+</body>
+</html>
