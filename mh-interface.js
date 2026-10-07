@@ -3,7 +3,7 @@
 const source = window.MH_SOURCE;
 const $ = id => document.getElementById(id);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const games = {wilds:'荒野',world:'世界 / 冰原'};
+const games = {traveler:'旅人',wilds:'荒野',world:'世界 / 冰原'};
 const systemGroups = {all:'全部系统',menu:'界面与菜单',items:'道具与快捷栏',map:'地图与导航',mount:'移动与坐骑',social:'联机与记录'};
 const state = {game:'wilds',domain:'combat',weapon:'common',combat:'melee',system:'all',device:'km',query:'',selectedKey:null,selectedAction:null,scope:'selection',tableQuery:'',limit:40};
 const SOURCES = {
@@ -32,6 +32,8 @@ function tokenAlternatives(token,game,cls){
   if(token==='l2') return game==='wilds'?[{...one('Alt'),toggle:true},one('侧键2',true)]:cls==='melee'?[one('C',true),{...one('中键'),toggle:true}]:[one('右键',true)];
   if(token==='ls') return ['W','A','S','D'].map(k=>one(k));
   if(token==='dp') return ['↑','↓'].map(k=>one(k));
+  if(token==='d_up') return [one('↑')];
+  if(token==='d_down') return [one('↓')];
   return [one(tokenKeys[game][cls][token]||token)];
 }
 function legacyPad(text){
@@ -98,7 +100,7 @@ const recordMap=new Map();
 function addRecord(descriptor,game,version){
   const identity=descriptor.identity||[descriptor.domain,descriptor.category,descriptor.context,descriptor.weapon||'',descriptor.action].join('|');
   let rec=recordMap.get(identity);
-  if(!rec){rec={...descriptor,id:`action-${records.length}`,versions:{}};records.push(rec);recordMap.set(identity,rec);}
+  if(!rec){rec={...descriptor,id:descriptor.id||`action-${records.length}`,versions:{}};records.push(rec);recordMap.set(identity,rec);}
   if(!rec.versions[game]) rec.versions[game]=version;
   else {
     const existing=rec.versions[game];
@@ -109,6 +111,7 @@ function addRecord(descriptor,game,version){
   return rec;
 }
 for(const game of Object.keys(games)){
+  if(!source.general[game])continue;
   source.general[game].forEach(grp=>grp.rows.forEach(original=>{
     const r={...original};
     if(game==='world'&&r.a==='随从 / 调查组指令') r.a='观察用具（Surveyor Set）';
@@ -125,51 +128,49 @@ for(const game of Object.keys(games)){
     addRecord({...location,action:canonical(r.a),original:r.a},game,{keyboard,pad,note:r.n||'',uncertain:!!r.u||keyboard.alternatives.length===0,source:SOURCES[game],sourceName:game==='wilds'?'荒野按键资料':'冰原 Type 1 资料'});
   }));
 }
-const fixes = {
-  gs:{'○ / B — 蓄力系起手（长按蓄力）':{action:'蓄力斩',input:'t',hold:true},'蓄力斩（长按蓄力，松开释放）':{action:'蓄力斩',input:'t',hold:true},'纵斩 → 横斩（连段）':{input:'t+c',sequence:true},'肩撞（蓄力中派生，可衔接）':{action:'肩撞',input:'c',hold:false,condition:'蓄力中'}},
-  sns:{'□ / X — 持刀使用道具（无需收刀）':{action:'持刀使用道具',input:'r2+s',hold:false},'持刀使用道具（片手剑独有优势）':{action:'持刀使用道具',input:'r2+s',hold:false}},
-  hm:{'△ / Y — 纵挥 / 五连敲':{action:'纵挥',input:'t'},'○ / B — 纵挥三连击':{action:'敲打',input:'c'},'纵挥三连击':{input:'t+t+t',sequence:true},'五连敲':{input:'c+c+c+c+c',sequence:true},'本垒打（连招收尾高威力）':{input:'t',condition:'纵挥连段末尾'}},
-  ln:{'△ / Y — 上段突刺':{action:'中段突刺',input:'t'},'○ / B — 中段突刺':{action:'上段突刺',input:'c'}},
-  bw:{'龙之箭（龙之矢，瞄准中 R2 + ○）':{action:'龙之矢',input:'t+c'}},
-  gl:{'龙击炮（△+○ 长按 / 全套派生）':{action:'龙击炮',input:'r2+t+c'}},
-  ls:{'特殊纳刀 → 居合拔刀斩':{action:'特殊纳刀',input:'r2+x',condition:'攻击后；再按普通攻击键衍生居合拔刀斩'}}
-};
-function weaponInput(tokens,game,cls,sequence,hold){
-  let alternatives=[{steps:[],hold:!!hold}];
-  for(const token of tokens){
-    const choices=tokenAlternatives(token,game,cls);
-    alternatives=alternatives.flatMap(previous=>choices.map(choice=>{
-      const steps=previous.steps.map(step=>[...step]);
-      if(sequence||previous.toggle||!steps.length)steps.push([...choice.steps[0]]);
-      else steps[steps.length-1].push(...choice.steps[0]);
-      return {steps,hold:previous.hold||choice.hold,toggle:!!choice.toggle};
-    }));
-  }
-  return {alternatives,note:''};
-}
-function weaponPad(tokens,sequence,hold){
-  const expand=token=>token==='tc'?['t','c']:[token];
-  const steps=sequence?tokens.map(expand):[tokens.flatMap(expand)];
-  return {ps:[{steps,hold:!!hold}],xbox:[{steps,hold:!!hold}],note:''};
-}
-for(const weapon of source.weapons){
-  weapon.groups.filter(g=>g.title!=='键鼠要点').forEach(group=>group.rows.forEach(row=>{
-    const fix=fixes[weapon.id]?.[row.a]||{};
-    const action=fix.action||row.a.replace(/^[^—]+ — /,'').replace(/（[^）]*）/g,'').trim();
-    let input=fix.input||row.in;
-    if(input==='r1'&&row.only==='wilds') input='l2+r1';
-    const tokens=input.split('+');
-    const sequence=fix.sequence ?? (tokens.length>1&&(tokens.every(t=>t===tokens[0])||(tokens.every(t=>['t','c'].includes(t))&&/→/.test(row.a))));
-    const hold=fix.hold ?? !!row.hold;
-    const condition=fix.condition||((row.a.match(/（([^）]*)）/)||[])[1]||'');
-    const descriptor={domain:'combat',category:'weapon',weapon:weapon.id,action,original:row.a,context:weapon.name,section:group.title==='按键语义'?'基础动作':'核心招式',condition,identity:`weapon|${weapon.id}|${action}|${input}|${sequence}|${hold}`};
-    for(const game of Object.keys(games)){
-      if(row.only&&row.only!==game) continue;
-      const version={keyboard:weaponInput(tokens,game,weapon.cls,sequence,hold),pad:weaponPad(tokens,sequence,hold),note:[condition,row.n,'由既有武器资料与对应版本键位映射整理，招式条件仍需游戏内核对。'].filter(Boolean).join('；'),uncertain:true,inferred:true,source:weapon.id==='gl'?SOURCES.gunlance:SOURCES.weapons,sourceName:'武器资料 / 映射推导'};
-      if(weapon.id==='ig'&&game==='wilds'&&/猎虫|螺旋|急袭/.test(action)) version.note+=' 荒野与世界的猎虫操作可能不同，不视作已验证输入。';
-      addRecord(descriptor,game,version);
-    }
+const KIND_SECTION={start:'起手动作',state:'状态与资源',special:'特殊动作',air:'空中动作',mount:'骑乘',focus:'集中模式',combo:'派生招式'};
+function parseMoveInput(str){
+  let hold=false;
+  const steps=String(str).split('>').map(step=>step.split('+').map(tok=>{
+    let t=tok.trim();if(t.endsWith('!')){hold=true;t=t.slice(0,-1);}return t;
   }));
+  return {steps,hold};
+}
+function keyboardFromMove(parsed,game,cls){
+  let alts=[{steps:[],hold:parsed.hold}];
+  parsed.steps.forEach(step=>{
+    let combos=[[]];
+    step.forEach(token=>{
+      const choices=tokenAlternatives(token,game,cls).map(a=>a.steps[0]);
+      const next=[];
+      combos.forEach(existing=>choices.forEach(choice=>next.push(existing.concat(choice))));
+      combos=next;
+    });
+    alts=alts.flatMap(prev=>combos.map(combo=>({steps:[...prev.steps,combo],hold:prev.hold})));
+  });
+  return {alternatives:alts,note:''};
+}
+function padFromMove(parsed){
+  const steps=parsed.steps.map(step=>step.flatMap(t=>t==='tc'?['t','c']:[t]));
+  return {ps:[{steps,hold:parsed.hold}],xbox:[{steps,hold:parsed.hold}],note:''};
+}
+for(const wid of Object.keys(source.weapons)){
+  const weapon=source.weapons[wid];
+  weapon.moves.forEach((tuple,index)=>{
+    const [mid,name,parent,input,kind,condition,note,flag]=tuple;
+    const parsed=parseMoveInput(input);
+    const gameList=flag==='w'?['wilds']:flag==='o'?['world']:['wilds','world'];
+    const descriptor={domain:'combat',category:'weapon',weapon:wid,action:name,original:name,context:weapon.name,
+      section:KIND_SECTION[kind]||'派生招式',condition:condition||'',
+      parent:parent?`move-${wid}-${parent}`:null,kind,wid,order:index,
+      id:`move-${wid}-${mid}`,identity:`move|${wid}|${mid}`};
+    gameList.forEach(game=>{
+      const version={keyboard:keyboardFromMove(parsed,game,weapon.cls),pad:padFromMove(parsed),
+        note:[condition,note,'招式与派生关系为资料整理，未在游戏内逐招核对；键位映射以游戏内键鼠设置为准。'].filter(Boolean).join('；'),
+        uncertain:true,inferred:true,source:SOURCES.weapons,sourceName:'武器资料 / 映射推导'};
+      addRecord(descriptor,game,version);
+    });
+  });
 }
 const byId=new Map(records.map(r=>[r.id,r]));
 function keySet(version){return new Set((version?.keyboard.alternatives||[]).flatMap(a=>a.steps.flat()));}
@@ -346,18 +347,27 @@ function rowBinding(record){
 }
 function renderFunctions(){
   current=visibleRecords();
-  const sides=splitGroups(current);
+  const columnRows=current.filter(r=>r.kind!=='combo');
+  const sides=splitGroups(columnRows);
+  const weapon=state.domain==='combat'&&state.weapon!=='common'?source.weapons[state.weapon]:null;
   ['left','right'].forEach(side=>{
-    $(side+'-functions').innerHTML=sides[side].map(group=>`<section class="function-section"><h3>${escape(group.title)}<span>${String(group.rows.length).padStart(2,'0')}</span></h3>${group.rows.map(r=>{
+    let head='';
+    if(weapon&&side==='left'){
+      head=`<div class="mech-card"><h4>核心机制 · ${escape(weapon.gauge.name)}</h4><p>${escape(weapon.gauge.desc)}</p>${weapon.gauge.keys.length?`<div class="input-set">${weapon.gauge.keys.map(k=>keyBadge(k)).join('')}</div>`:''}</div>`;
+    }
+    if(weapon&&side==='right'){
+      head=`<details class="tips-box"><summary>操作建议</summary>${weapon.tips.map(t=>`<p>${escape(t)}</p>`).join('')}</details>`;
+    }
+    $(side+'-functions').innerHTML=head+(sides[side].map(group=>`<section class="function-section"><h3>${escape(group.title)}<span>${String(group.rows.length).padStart(2,'0')}</span></h3>${group.rows.map(r=>{
       const v=r.versions[state.game];
       return `<button class="function-row" data-action="${r.id}" aria-pressed="false"><span class="row-label"><span class="action-name">${highlight(r.action)}${v.uncertain?'<span class="review-dot" title="含待核对输入，详见下方"></span>':''}</span>${r.condition?`<span class="row-context">${escape(r.condition)}</span>`:''}</span><span class="row-binding">${rowBinding(r)}</span></button>`;
-    }).join('')}</section>`).join('')||'<p class="column-empty">此侧暂无匹配功能</p>';
+    }).join('')}</section>`).join('')||'<p class="column-empty">此侧暂无匹配功能</p>');
   });
   const keys=state.device==='pad'?new Set(current.flatMap(r=>[...padNodeSet(r,state.game)])):new Set(current.flatMap(r=>[...keySet(r.versions[state.game])]));
   $('binding-count').textContent=`${current.length} 项功能 · ${keys.size} 个输入`;
   document.querySelectorAll('.device-key').forEach(el=>el.classList.toggle('bound',keys.has(el.dataset.key)));
 }
-function contextTitle(){return state.domain==='system'?systemGroups[state.system]:state.weapon==='common'?(state.combat==='mounted'?'骑乘怪物':'通用动作'):source.weapons.find(w=>w.id===state.weapon).name;}
+function contextTitle(){return state.domain==='system'?systemGroups[state.system]:state.weapon==='common'?(state.combat==='mounted'?'骑乘怪物':'通用动作'):source.weapons[state.weapon].name;}
 function renderContext(){
   const system=state.domain==='system';
   document.querySelectorAll('[data-domain]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.domain===state.domain)));
@@ -366,7 +376,7 @@ function renderContext(){
     $('context-description').textContent='系统功能按使用场景分组，不与武器招式混排。';
   }else{
     const modes = [['melee','近战基础'],['ranged','远程基础'],['mounted','骑乘怪物']].map(([id,name])=>`<button class="context-chip" data-combat="${id}" aria-pressed="${state.combat===id}">${name}</button>`).join('');
-    const weapons = source.weapons.map(w=>`<button class="context-chip weapon-chip" data-weapon="${w.id}" aria-pressed="${state.weapon===w.id}">${w.name}</button>`).join('');
+    const weapons = Object.entries(source.weapons).map(([id,w])=>`<button class="context-chip weapon-chip" data-weapon="${id}" aria-pressed="${state.weapon===id}">${w.name}</button>`).join('');
     const scene = state.weapon==='common' ? `<span class="context-separator"></span>${modes}` : '<span class="context-caption">通用移动 + 当前武器招式</span>';
     $('context-controls').innerHTML=`<button class="context-chip" id="common-button" aria-pressed="${state.weapon==='common'}">通用动作</button><span class="context-separator"></span><span class="context-caption">14 武器</span>${weapons}${scene}`;
     $('context-description').textContent=state.weapon==='common'?'先选择操作场景，再点击按键查看映射。':'招式资料含映射推导，具体派生以游戏内出招表为准。';
@@ -389,31 +399,32 @@ function applySelection(){
   document.querySelectorAll('.device-key').forEach(el=>{
     const chosen=keys.has(el.dataset.key);el.classList.toggle('selected',chosen);el.classList.toggle('dimmed',active&&!chosen);el.setAttribute('aria-pressed',String(chosen));
   });
-  document.querySelectorAll('.function-row').forEach(el=>{const chosen=selectedIds.has(el.dataset.action);el.classList.toggle('selected',chosen);el.classList.toggle('dimmed',active&&!chosen);el.setAttribute('aria-pressed',String(chosen));});
+  document.querySelectorAll('.function-row,.tree-row').forEach(el=>{const chosen=selectedIds.has(el.dataset.action);el.classList.toggle('selected',chosen);el.classList.toggle('dimmed',active&&!chosen);el.setAttribute('aria-pressed',String(chosen));});
   const chosenName=state.selectedKey?(state.device==='pad'?padNodes.find(n=>n.id===state.selectedKey)?.label:keyboardNames[state.selectedKey]||state.selectedKey):null;
   $('selection-hint').textContent=state.selectedAction?`${selected[0]?.action||'当前功能'} · 组合键中的所有按键同步点亮`:state.selectedKey?`${chosenName} · 当前视图 ${selected.length} 项功能；下方可查看两作全部关联`:'点击按键或两侧功能，查看它们的对应关系。';
   $('reset-selection').disabled=!active;
   scheduleLines();
 }
 let lineFrame=0;
-function scheduleLines(){cancelAnimationFrame(lineFrame);lineFrame=requestAnimationFrame(drawConnections);}
+function scheduleLines(){cancelAnimationFrame(lineFrame);lineFrame=requestAnimationFrame(()=>{if(state.game==='traveler'){if(window.MH_TRAVELER)MH_TRAVELER.drawLines();return;}drawConnections();});}
 function drawConnections(){
-  const layer=$('connection-layer'),board=$('mapping-board'),bounds=board.getBoundingClientRect();
+  const layer=$('connection-layer'),wrap=$('map-wrap'),bounds=wrap.getBoundingClientRect();
   layer.setAttribute('viewBox',`0 0 ${bounds.width} ${bounds.height}`);
   const paths=[];
   const selected=selectionRows();
   selected.forEach(record=>{
-    const target=board.querySelector(`[data-action="${record.id}"]`);if(!target)return;
-    const tr=target.getBoundingClientRect(),column=target.closest('.function-column'),cr=column.getBoundingClientRect();
-    if(tr.bottom<=cr.top||tr.top>=cr.bottom)return;
-    const isLeft=column.id==='left-functions';
+    const target=wrap.querySelector(`[data-action="${record.id}"]`);if(!target)return;
+    const tr=target.getBoundingClientRect(),column=target.closest('.function-column'),cr=column?column.getBoundingClientRect():null;
+    const inColumn=!!column;
+    if(inColumn&&(tr.bottom<=cr.top||tr.top>=cr.bottom))return;
+    const isLeft=inColumn&&column.id==='left-functions';
     const keyIds=state.selectedKey?[state.selectedKey]:[...(state.device==='pad'?padNodeSet(record,state.game):keySet(record.versions[state.game]))];
     keyIds.forEach(key=>{
-      const nodes=[...board.querySelectorAll('.device-key')].filter(el=>el.dataset.key===key);
+      const nodes=[...wrap.querySelectorAll('.device-key')].filter(el=>el.dataset.key===key);
       const node=nodes.find(el=>!el.dataset.physical?.endsWith('Right'))||nodes[0];if(!node)return;
       const kr=node.getBoundingClientRect();
       const x1=(isLeft?kr.left:kr.right)-bounds.left,y1=kr.top+kr.height/2-bounds.top;
-      const x2=(isLeft?tr.right:tr.left)-bounds.left,y2=Math.max(cr.top+3,Math.min(tr.top+tr.height/2,cr.bottom-3))-bounds.top;
+      const x2=(isLeft?tr.right:tr.left)-bounds.left,y2=inColumn?Math.max(cr.top+3,Math.min(tr.top+tr.height/2,cr.bottom-3))-bounds.top:tr.top+tr.height/2-bounds.top;
       const bend=isLeft?Math.min(x1-16,x2+14):Math.max(x1+16,x2-14);
       paths.push(`<path class="connection-line" d="M${x1},${y1} L${bend},${y1} L${bend},${y2} L${x2},${y2}"/><circle class="connection-end" cx="${x1}" cy="${y1}" r="3"/><circle class="connection-end" cx="${x2}" cy="${y2}" r="3"/>`);
     });
@@ -469,7 +480,40 @@ function renderFooter(){
   const footer=document.querySelector('footer');footer.id='atlas-footer';
   footer.innerHTML=`<details><summary>资料来源、图标许可与版本说明</summary><div class="source-grid"><a href="${SOURCES.wilds}" target="_blank" rel="noopener">游侠网 · 荒野按键表（2025-02）</a><a href="${SOURCES.world}" target="_blank" rel="noopener">Shacknews · 冰原 Type 1（2020-01）</a><a href="${SOURCES.weapons}" target="_blank" rel="noopener">3DM · 世界映射与武器操作（2018-09）</a><a href="${SOURCES.gunlance}" target="_blank" rel="noopener">游民星空 · 荒野铳枪（2025-04）</a><a href="https://simpleicons.org/" target="_blank" rel="noopener">Simple Icons · CC0 图标来源</a></div><p>PlayStation 标识取自 Simple Icons 13.21.0，Xbox 标识取自 11.15.0；SVG 已内联，可离线使用。品牌商标归各自权利人所有，本站为非官方操作参考。</p><p>世界键鼠采用已收集的冰原 Type 1 / 多键鼠标资料，不等同于 2018 首发预设。当前版本、无侧键鼠标和自定义设置可能不同。武器栏保留既有招式资料并明确标记映射推导，未完成游戏内逐招验证；未收录内容不代表没有按键。</p><p>同时按下用「组合」外框，依次输入用箭头，备用输入用「或」。左右修饰键在图中共用参考绑定，不保证游戏接受右侧修饰键；请以游戏内键鼠设置为准。</p></details>`;
 }
-function refresh(){state.selectedKey=null;state.selectedAction=null;state.limit=40;renderContext();renderFunctions();applySelection();renderComparison();}
+let treeOpen=false;
+function renderTree(){
+  const panel=$('tree-panel');
+  const isWeapon=state.domain==='combat'&&state.weapon!=='common';
+  panel.hidden=!isWeapon;
+  if(!isWeapon){scheduleLines();return;}
+  const records=visibleRecords().filter(r=>r.wid===state.weapon);
+  const weapon=source.weapons[state.weapon];
+  const header=`<div class="tree-head"><div class="tree-notice"><strong>⚠ 派生内容为资料整理，未在游戏内逐招核对</strong><span>键位映射以游戏内键鼠设置为准；展开后点击招式行可高亮输入并在图上连线。</span></div><button class="subtle-button" id="tree-toggle">${treeOpen?'收起派生链':`展开完整派生链（${records.length} 招）`}</button></div>`;
+  if(!treeOpen){panel.innerHTML=header;bindTree(panel);scheduleLines();return;}
+  const byParent=new Map();
+  records.forEach(r=>{const key=r.parent||'__root__';if(!byParent.has(key))byParent.set(key,[]);byParent.get(key).push(r);});
+  const rows=[];
+  const walk=(parentId,depth)=>{
+    (byParent.get(parentId||'__root__')||[]).forEach(r=>{
+      rows.push({record:r,depth});
+      walk(r.id,depth+1);
+    });
+  };
+  walk(null,0);
+  const body=rows.map(({record:r,depth})=>{
+    const v=r.versions[state.game];
+    return `<button class="tree-row" data-action="${r.id}" aria-pressed="false" style="margin-left:${depth*22}px"><span class="tree-wire" aria-hidden="true"></span><span class="row-label"><span class="action-name">${highlight(r.action)}<span class="cred-tag">推导</span>${v.uncertain?'<span class="review-dot" title="含待核对输入"></span>':''}</span>${r.condition?`<span class="row-context">${escape(r.condition)}</span>`:''}</span><span class="row-binding">${rowBinding(r)}</span></button>`;
+  }).join('');
+  panel.innerHTML=header+`<div class="tree-body">${body||'<p class="column-empty">当前筛选下没有派生招式</p>'}</div>`;
+  bindTree(panel);
+  scheduleLines();
+}
+function bindTree(panel){
+  const toggle=panel.querySelector('#tree-toggle');
+  if(toggle)toggle.addEventListener('click',()=>{treeOpen=!treeOpen;renderTree();});
+  panel.querySelectorAll('.tree-row').forEach(row=>row.addEventListener('click',()=>selectAction(row.dataset.action)));
+}
+function refresh(){if(state.game==='traveler'){if(window.MH_TRAVELER)MH_TRAVELER.render();return;}state.selectedKey=null;state.selectedAction=null;state.limit=40;renderContext();renderFunctions();renderTree();applySelection();renderComparison();}
 $('game-select').addEventListener('change',e=>{state.game=e.target.value;refresh();});
 document.querySelectorAll('[data-domain]').forEach(button=>button.addEventListener('click',()=>{state.domain=button.dataset.domain;refresh();}));
 $('context-controls').addEventListener('click',event=>{
@@ -482,22 +526,26 @@ $('context-controls').addEventListener('click',event=>{
 let searchTimer;
 $('atlas-search').addEventListener('input',event=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>{state.query=event.target.value.trim();refresh();},140);});
 $('clear-search').addEventListener('click',()=>{clearTimeout(searchTimer);$('atlas-search').value='';state.query='';refresh();$('atlas-search').focus();});
+const isTraveler=()=>state.game==='traveler';
 $('mapping-board').addEventListener('click',event=>{
+  if(isTraveler())return;
   const key=event.target.closest('.device-key');const row=event.target.closest('.function-row');
   if(key)selectKey(key.dataset.key);else if(row)selectAction(row.dataset.action);else if(!event.target.closest('button'))resetSelection();
 });
 $('mapping-board').addEventListener('keydown',event=>{
+  if(isTraveler())return;
   const key=event.target.closest('.device-key');
   if(key&&(event.key==='Enter'||event.key===' ')){event.preventDefault();selectKey(key.dataset.key);}
   if(event.key==='Escape')resetSelection();
 });
 $('mapping-board').addEventListener('pointerover',event=>{
+  if(isTraveler())return;
   const row=event.target.closest('.function-row'),key=event.target.closest('.device-key');
   if(row)hoverKeys(state.device==='pad'?padNodeSet(byId.get(row.dataset.action),state.game):keySet(byId.get(row.dataset.action).versions[state.game]),row.dataset.action);
   else if(key)hoverKeys(new Set([key.dataset.key]));
 });
-$('mapping-board').addEventListener('pointerout',event=>{if(!event.target.closest('.function-row,.device-key')?.contains(event.relatedTarget))hoverKeys(new Set());});
-$('reset-selection').addEventListener('click',resetSelection);
+$('mapping-board').addEventListener('pointerout',event=>{if(isTraveler())return;if(!event.target.closest('.function-row,.device-key')?.contains(event.relatedTarget))hoverKeys(new Set());});
+$('reset-selection').addEventListener('click',()=>{if(!isTraveler())resetSelection();});
 $('comparison-scope').addEventListener('change',e=>{state.scope=e.target.value;state.limit=40;renderComparison();});
 $('comparison-search').addEventListener('input',e=>{state.tableQuery=e.target.value;state.limit=40;renderComparison();});
 $('load-more').addEventListener('click',()=>{state.limit+=60;renderComparison();});
@@ -505,10 +553,11 @@ function openComparison(scope){state.scope=scope;state.tableQuery='';$('comparis
 $('list-button').addEventListener('click',()=>openComparison('all'));
 $('review-button').addEventListener('click',()=>openComparison('review'));
 $('review-count').textContent=records.filter(r=>Object.values(r.versions).some(v=>v.uncertain||!v.pad.ps.length)).length;
-['left-functions','right-functions'].forEach(id=>$(id).addEventListener('scroll',scheduleLines,{passive:true}));
+['left-functions','right-functions','tree-panel'].forEach(id=>$(id).addEventListener('scroll',scheduleLines,{passive:true}));
 window.addEventListener('resize',scheduleLines);
 const observer=new ResizeObserver(scheduleLines);observer.observe($('mapping-board'));
 document.querySelectorAll('.device-tabs button').forEach(button=>button.addEventListener('click',()=>{
+  if(state.game==='traveler') return;
   state.device=button.dataset.device;state.selectedKey=null;state.selectedAction=null;state.limit=40;
   document.querySelectorAll('.device-tabs button').forEach(b=>b.setAttribute('aria-selected',String(b===button)));
   $('view-km').hidden=state.device!=='km';
@@ -517,5 +566,5 @@ document.querySelectorAll('.device-tabs button').forEach(button=>button.addEvent
   renderFunctions();applySelection();renderComparison();
 }));
 renderDevices();renderFooter();refresh();
-window.MH_ATLAS={records,state,visibleRecords,refresh,padNodeIds,padNodeSet,keySet};
+window.MH_ATLAS={records,state,visibleRecords,refresh,padNodeIds,padNodeSet,keySet,renderInput,keyBadge,padBadge,brand,mouseIcon};
 })();

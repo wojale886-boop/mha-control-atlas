@@ -184,6 +184,51 @@ footer h4{color:var(--tx2);font-size:13px;margin-bottom:8px;font-weight:600}
 @media(max-width:720px){ h1{font-size:22px} .hero{padding:28px 0 20px} }
 </style>
 <link rel="stylesheet" href="mh-interface.css">
+<style>
+/* 旅人模块样式 */
+.tv-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.tv-scheme{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#9CA3AF}
+.tv-scheme select{padding:6px 10px;border-radius:8px;background:#252932;border:1px solid rgba(255,255,255,.08);color:#F3F4F6;font-family:inherit}
+.tv-status{font-size:11.5px;color:#7d8590}
+.tv-status.ok{color:#34D399}
+.tv-status.warn{color:#FBBF24}
+.tv-conflict-btn{color:#F87171!important;border-color:rgba(248,113,113,.45)!important}
+.tv-tag{display:inline-block;margin-left:6px;font-size:9.5px;padding:0 5px;border-radius:4px;border:1px solid rgba(245,165,36,.45);color:#d5aa6d;vertical-align:1px}
+.tv-warn{display:inline-block;margin-left:6px;font-size:9.5px;padding:0 5px;border-radius:4px;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.5);color:#FCA5A5;vertical-align:1px}
+.tv-act{font-size:10px;color:#9aa3ad;margin-right:2px}
+.tv-only{font-size:11px;color:#8d7a5a;font-style:italic}
+.tv-ref{display:block;font-size:10.5px;color:#7d8590;margin-top:2px}
+.tv-cell{cursor:pointer;position:relative;transition:background .15s}
+.tv-cell:hover{background:rgba(245,165,36,.08)}
+.tv-pen{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;color:#d5aa6d;opacity:0;transition:opacity .15s}
+.tv-cell:hover .tv-pen{opacity:1}
+.tv-table tr.tv-selected td{background:rgba(245,165,36,.09)}
+.tv-table tr.tv-selected td:first-child{box-shadow:inset 3px 0 0 #F5A524}
+.tv-table th.tv-head{color:#F5A524}
+.tv-edit-btn{color:#d5aa6d!important;border-color:rgba(245,165,36,.5)!important}
+.tv-edit-btn:hover{color:#F5A524!important;border-color:#F5A524!important}
+.tv-edit-btn:disabled{opacity:.4;cursor:not-allowed}
+.tv-modal{position:fixed;inset:0;background:rgba(0,0,0,.62);display:grid;place-items:center;z-index:100}
+.tv-modal[hidden]{display:none}
+.tv-box{width:min(880px,94vw);max-height:90vh;overflow:auto;background:#1d2127;border:1px solid #3a4048;border-radius:14px;padding:18px 22px;box-shadow:0 30px 80px rgba(0,0,0,.75)}
+.tv-box h4{font-size:15px;margin-bottom:4px}
+.tv-curline{font-size:12px;color:#9aa3ad;margin-bottom:12px}
+.tv-sec{margin:12px 0 6px;font-size:11px;color:#8d959e;letter-spacing:1px}
+.tv-chips{display:flex;flex-wrap:wrap;gap:6px}
+.tv-chip{padding:6px 11px;border-radius:7px;border:1px solid #494e56;background:#2b3038;color:#d4d8de;font:12px "Segoe UI","Microsoft YaHei",sans-serif;cursor:pointer;user-select:none}
+.tv-chip:hover{border-color:#F5A524;color:#F5A524}
+.tv-chip.on{background:#F5A524;color:#1a1206;border-color:#F5A524;font-weight:700}
+.tv-chip.mod{border-style:dashed}
+.tv-comboline{display:flex;align-items:center;gap:12px;margin:12px 0;padding:10px 14px;background:#171a1f;border:1px solid #30343b;border-radius:9px;min-height:46px;flex-wrap:wrap}
+.tv-comboline .lbl{font-size:11px;color:#8d959e;flex:none}
+.tv-altlist{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tv-alt{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:7px;background:#2b3038;border:1px solid #494e56;font-size:12px}
+.tv-alt button{background:none;border:0;color:#F87171;cursor:pointer;font-size:13px;padding:0}
+.tv-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;align-items:center}
+.tv-err{color:#F87171;font-size:12px;margin-right:auto}
+.tv-primary{background:linear-gradient(145deg,#F5A524,#E07B12);color:#1a1206;border:0;padding:8px 18px;border-radius:9px;font-weight:700;cursor:pointer;font-family:inherit}
+.tv-ghost{background:#2b3038;color:#d4d8de;border:1px solid #494e56;padding:8px 16px;border-radius:9px;cursor:pointer;font-family:inherit}
+</style>
 </head>
 <body>
 
@@ -194,11 +239,11 @@ footer h4{color:var(--tx2);font-size:13px;margin-bottom:8px;font-weight:600}
 <main class="atlas-main">
   <section class="atlas-intro"><div><p class="eyebrow">HUNTER'S CONTROL ATLAS / 02</p><h1>让每一次操作，<span>一目了然。</span></h1><p class="intro-note">从按键到动作，从通用操作到武器招式。在同一张图上找到答案。</p></div><div class="intro-numbers"><div><strong>02</strong><span>狩猎世界</span></div><div><strong>14</strong><span>武器类型</span></div><div><strong>03</strong><span>输入体系</span></div></div></section>
   <section class="atlas-controls" aria-label="筛选操作">
-    <div class="controls-top"><label class="field-label">游戏版本<select id="game-select"><option value="wilds">怪物猎人 · 荒野</option><option value="world">怪物猎人 · 世界 / 冰原</option></select></label><div class="domain-tabs" aria-label="操作类型"><button data-domain="combat" aria-pressed="true">战斗操作</button><button data-domain="system" aria-pressed="false">系统功能</button></div><div class="atlas-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/></svg><input id="atlas-search" aria-label="搜索当前视图动作或按键" placeholder="搜索当前视图：动作、按键、组合…" type="search"><button id="clear-search" aria-label="清空搜索">×</button></div></div>
+    <div class="controls-top"><label class="field-label">游戏版本<select id="game-select"><option value="traveler">怪物猎人 · 旅人</option><option value="wilds">怪物猎人 · 荒野</option><option value="world">怪物猎人 · 世界 / 冰原</option></select></label><div class="domain-tabs" aria-label="操作类型"><button data-domain="combat" aria-pressed="true">战斗操作</button><button data-domain="system" aria-pressed="false">系统功能</button></div><div class="atlas-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5 5"/></svg><input id="atlas-search" aria-label="搜索当前视图动作或按键" placeholder="搜索当前视图：动作、按键、组合…" type="search"><button id="clear-search" aria-label="清空搜索">×</button></div></div>
     <div class="controls-bottom"><div id="context-controls"></div><p id="context-description"></p></div>
   </section>
   <section class="atlas-map-section" aria-labelledby="map-title"><div class="map-heading"><div><span class="section-index">01 /</span><h2 id="map-title">通用动作</h2><span class="context-tag" id="map-subtitle"></span></div><p><span class="live-dot"></span><span id="binding-count" aria-live="polite"></span></p></div>
-    <div class="map-viewport"><div id="mapping-board" class="mapping-board"><aside id="left-functions" class="function-column" aria-label="左侧功能"></aside><div id="device-stage" class="device-stage"><div class="stage-heading"><span id="stage-title">KEYBOARD + MOUSE</span><span id="stage-version"></span></div><div class="device-tabs" role="tablist" aria-label="输入设备"><button id="tab-km" role="tab" data-device="km" aria-selected="true" aria-controls="view-km">键鼠</button><button id="tab-pad" role="tab" data-device="pad" aria-selected="false" aria-controls="view-pad">手柄</button></div><div id="view-km" role="tabpanel" aria-label="键鼠视图"><div id="keyboard-device" aria-label="可点击键盘"></div><div class="stage-bottom"><div class="input-legend"><span><i class="legend-bound"></i>当前有绑定</span><span><i class="legend-selected"></i>选中 / 连线</span><span><i class="legend-empty"></i>当前未收录</span></div><div id="mouse-device" aria-label="可点击鼠标"></div></div></div><div id="view-pad" role="tabpanel" aria-label="手柄视图" hidden><div id="pad-device" aria-label="可点击 DualSense 手柄"></div><div class="pad-caption">DualSense 无线控制器 · 点击按键查看对应功能</div></div><div class="stage-hint" id="selection-hint" aria-live="polite">点击按键或两侧功能，查看它们的对应关系。</div><button id="reset-selection" class="subtle-button">清除选中</button></div><aside id="right-functions" class="function-column" aria-label="右侧功能"></aside><svg id="connection-layer" aria-hidden="true"></svg></div></div>
+    <div id="map-wrap" style="position:relative"><div class="map-viewport"><div id="mapping-board" class="mapping-board"><aside id="left-functions" class="function-column" aria-label="左侧功能"></aside><div id="device-stage" class="device-stage"><div class="stage-heading"><span id="stage-title">KEYBOARD + MOUSE</span><span id="stage-version"></span></div><div class="device-tabs" role="tablist" aria-label="输入设备"><button id="tab-km" role="tab" data-device="km" aria-selected="true" aria-controls="view-km">键鼠</button><button id="tab-pad" role="tab" data-device="pad" aria-selected="false" aria-controls="view-pad">手柄</button></div><div id="view-km" role="tabpanel" aria-label="键鼠视图"><div id="keyboard-device" aria-label="可点击键盘"></div><div class="stage-bottom"><div class="input-legend"><span><i class="legend-bound"></i>当前有绑定</span><span><i class="legend-selected"></i>选中 / 连线</span><span><i class="legend-empty"></i>当前未收录</span></div><div id="mouse-device" aria-label="可点击鼠标"></div></div></div><div id="view-pad" role="tabpanel" aria-label="手柄视图" hidden><div id="pad-device" aria-label="可点击 DualSense 手柄"></div><div class="pad-caption">DualSense 无线控制器 · 点击按键查看对应功能</div></div><div class="stage-hint" id="selection-hint" aria-live="polite">点击按键或两侧功能，查看它们的对应关系。</div><button id="edit-selection" class="subtle-button tv-edit-btn" hidden>✎ 修改快捷键</button><button id="reset-selection" class="subtle-button">清除选中</button></div><aside id="right-functions" class="function-column" aria-label="右侧功能"></aside></div></div><section id="tree-panel" class="tree-panel" hidden></section><svg id="connection-layer" aria-hidden="true"></svg></div>
     <div class="map-footnote"><span>点击展开连线 · 悬停预览键位 · 两侧列表可滚动查看更多</span><span>组合键 <b>+</b> 同时按下 / 连招 <b>→</b> 依次输入 / <b>长按</b> 持续输入</span></div>
   </section>
   <section id="comparison" class="comparison-section" aria-labelledby="comparison-title"><div class="comparison-heading"><div><p class="eyebrow">CROSS-GAME REFERENCE</p><h2 id="comparison-title">两作键位对照</h2><p id="comparison-description"></p></div><div class="comparison-tools"><label class="sr-only" for="comparison-scope">对照范围</label><select id="comparison-scope"><option value="selection">当前选择 / 视图</option><option value="all">全部系统与 14 武器</option><option value="review">待核对条目</option></select><input id="comparison-search" type="search" aria-label="搜索两作全部对照" placeholder="搜索全部对照…"></div></div><div id="comparison-results"></div><div class="comparison-pagination"><span id="comparison-total" aria-live="polite"></span><button class="subtle-button" id="load-more">展开更多</button></div></section>
@@ -223,6 +268,7 @@ footer h4{color:var(--tx2);font-size:13px;margin-bottom:8px;font-weight:600}
   </div>
 </footer>
 
+<script src="mh-weapons.js"></script>
 <script>
 /* =========================================================
    令牌：手柄功能位 → 标签 / 键鼠按键
@@ -870,8 +916,11 @@ const WEAPONS = [
   ]}
 ];
 
-window.MH_SOURCE = { general: GENERAL, weapons: WEAPONS };
+window.MH_SOURCE = { general: GENERAL, weapons: window.WEAPON_TREES };
 </script>
 <script src="mh-interface.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<script src="mh-traveler-data.js"></script>
+<script src="mh-traveler.js"></script>
 </body>
 </html>

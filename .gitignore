@@ -8,3 +8,6 @@
 # 系统杂项
 Thumbs.db
 Desktop.ini
+
+# IDE 项目数据（不进版本库）
+.codebuddy/
