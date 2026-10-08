@@ -63,15 +63,15 @@ window.TRAVELER_DATA = [
   "pad": "A",
   "ps": "✕",
   "kba": "空格",
-  "kbb": "空格",
+  "kbb": "鼠标右键",
   "trig": "单击",
   "edit": false,
-  "note": "",
+  "note": "方案B：右键=闪避（原神/鸣潮习惯）",
   "keysA": [
    "空格"
   ],
   "keysB": [
-   "空格"
+   "右键"
   ]
  },
  {
@@ -152,16 +152,16 @@ window.TRAVELER_DATA = [
   "name": "纳刀",
   "pad": "X",
   "ps": "□",
-  "kba": "Q",
-  "kbb": "鼠标右键",
+  "kba": "E",
+  "kbb": "Ctrl",
   "trig": "单击",
   "edit": false,
-  "note": "",
+  "note": "方案A：拔刀态按 E 纳刀（与使用道具同键）；方案B：Ctrl",
   "keysA": [
-   "Q"
+   "E"
   ],
   "keysB": [
-   "右键"
+   "Ctrl"
   ]
  },
  {
@@ -351,15 +351,15 @@ window.TRAVELER_DATA = [
   "pad": "RB",
   "ps": "R1",
   "kba": "B",
-  "kbb": "B",
+  "kbb": "Tab",
   "trig": "单击",
   "edit": false,
-  "note": "",
+  "note": "方案B：Tab=锁定（鸣潮习惯）",
   "keysA": [
    "B"
   ],
   "keysB": [
-   "B"
+   "Tab"
   ]
  },
  {
@@ -368,22 +368,18 @@ window.TRAVELER_DATA = [
   "name": "锁定轮盘（多目标）",
   "pad": "RB+推RS",
   "ps": "R1+推RS",
-  "kba": "按住B + 滚轮",
-  "kbb": "按住B + 滚轮",
-  "trig": "按住+滚轮",
+  "kba": "按住B + 鼠标移动",
+  "kbb": "按住Tab + 鼠标移动",
+  "trig": "按住+移动鼠标",
   "edit": false,
-  "note": "",
+  "note": "按住锁定键滑动鼠标，圆形轮盘选择多目标（对应手柄推右摇杆）",
   "keysA": [
-   "B",
-   "滚轮上",
-   "滚轮下"
+   "B"
   ],
   "keysB": [
-   "B",
-   "滚轮上",
-   "滚轮下"
+   "Tab"
   ]
- },
+},
  {
   "id": "lockpart",
   "cat": "锁定",
@@ -391,7 +387,7 @@ window.TRAVELER_DATA = [
   "pad": "RB+←→",
   "ps": "R1+←→",
   "kba": "按住B + 滚轮",
-  "kbb": "按住B + 滚轮",
+  "kbb": "按住Tab + 滚轮",
   "trig": "按住+滚轮",
   "edit": false,
   "note": "",
@@ -401,11 +397,11 @@ window.TRAVELER_DATA = [
    "滚轮下"
   ],
   "keysB": [
-   "B",
+   "Tab",
    "滚轮上",
    "滚轮下"
   ]
- },
+},
  {
   "id": "interact",
   "cat": "道具交互",
@@ -454,7 +450,7 @@ window.TRAVELER_DATA = [
   "kbb": "Z",
   "trig": "单击",
   "edit": false,
-  "note": "",
+  "note": "方案A：纳刀态按 E 使用默认道具（与纳刀同键）",
   "keysA": [
    "E"
   ],
@@ -545,21 +541,21 @@ window.TRAVELER_DATA = [
   "pad": "长按LB+推RS",
   "ps": "长按LB+推RS",
   "kba": "按住Tab + 滚轮",
-  "kbb": "按住Tab + 滚轮",
+  "kbb": "长按T + 滚轮",
   "trig": "按住+滚轮",
   "edit": false,
-  "note": "",
+  "note": "方案B：长按 T 呼出轮盘（鸣潮探索工具轮盘习惯）",
   "keysA": [
    "Tab",
    "滚轮上",
    "滚轮下"
   ],
   "keysB": [
-   "Tab",
+   "T",
    "滚轮上",
    "滚轮下"
   ]
- },
+},
  {
   "id": "build",
   "cat": "建造",

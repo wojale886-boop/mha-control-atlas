@@ -3,7 +3,7 @@
 const A = window.MH_ATLAS;
 const $ = id => document.getElementById(id);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const LS_KEY = 'mha_traveler_config_v3';
+const LS_KEY = 'mha_traveler_config_v5';
 const PAD_PS = window.PAD_PS || {};
 const isT = () => A.state.game === 'traveler';
 const isPad = () => A.state.device === 'pad';
@@ -21,7 +21,7 @@ function saveCache(label){
   sourceLabel = `本地缓存 · ${label} ${at}`;
 }
 const scheme = { cur:'A' };
-const padBrand = { cur:'xbox' };
+const padBrand = { cur:'ps' };
 const sel = { key:null, action:null };
 const byId = id => DATA.find(d => d.id === id);
 const kbField = () => scheme.cur === 'A' ? 'kba' : 'kbb';
@@ -98,7 +98,7 @@ function psOf(pad){ return String(pad).replace(/(RT|RB|LT|LB|RS|LS|Y|A|B|X)/g, m
 function currentKeys(d){ return isPad() ? padNodesOf(d.pad) : keysOfKb(d[kbField()]); }
 
 /* ================= 冲突检测（仅键鼠；同场景才算冲突） ================= */
-const SHARED = [['lockwheel','lockpart'],['interact','build_quick']];
+const SHARED = [['lockwheel','lockpart'],['interact','build_quick'],['sheath','item']];
 function ctxOf(d){ if(d.id === 'confirm') return 'ui'; if(d.cat === '近战') return 'melee'; if(d.cat === '远程') return 'ranged'; return 'common'; }
 function ctxOverlap(a, b){ if(a === 'ui' || b === 'ui') return a === b; if(a === 'common' || b === 'common') return true; return a === b; }
 function isShared(a, b){ return SHARED.some(([x, y]) => (x === a && y === b) || (x === b && y === a)); }
@@ -124,7 +124,7 @@ const DOMAINS = {
   system: { name:'系统功能', cats:['道具交互','建造','系统'], side:{道具交互:'left',建造:'right',系统:'right'} }
 };
 function currentDomain(){ return DOMAINS[A.state.domain] || DOMAINS.combat; }
-const TRIG_HINT = {'切换':'按一下切换跑动 / 行走','按住+滚轮':'按住触发键，滚动滚轮选择，松开确认','滚轮(交互提示时)':'交互提示出现时滚动滚轮切换，按 F 确认'};
+const TRIG_HINT = {'切换':'按一下切换跑动 / 行走','按住+滚轮':'按住触发键，滚动滚轮选择，松开确认','按住+移动鼠标':'按住触发键，滑动鼠标在圆形轮盘上选择目标，松开确认','滚轮(交互提示时)':'交互提示出现时滚动滚轮切换，按 F 确认'};
 let conflictIds = new Set();
 function bindingHtml(d){
   if(isPad()) return padHtml(d.pad, padBrand.cur);
@@ -277,7 +277,8 @@ function renderComparison(){
     return `<tr data-record="${esc(d.id)}" class="${selCls.trim()}"><td><span class="table-context">${esc(d.cat)}${d.edit ? ' · 玩家可改' : ''}</span><span class="table-action">${esc(d.name)}</span>${ref}</td>${travelerCells(d)}${refCells(d, 'wilds')}${refCells(d, 'world')}</tr>`;
   }).join('');
   $('comparison-title').textContent = `旅人键位对照 · 键鼠 ${scheme.cur} 方案 + ${brandLbl}`;
-  $('comparison-description').textContent = `每作同时陈列键鼠与手柄两列；手柄列显示${padBrand.cur === 'xbox' ? 'Xbox' : 'PlayStation'}写法（由 Xbox 写法自动换算），可用上方「手柄品牌」切换。点击旅人列可打开选取器修改。`;
+  $('comparison-description').textContent = `每作同时陈列键鼠与手柄两列；手柄列显示${padBrand.cur === 'xbox' ? 'Xbox' : 'PlayStation'}写法（由 Xbox 写法自动换算），可用右上角「手柄」按钮切换。点击旅人列可打开选取器修改。`;
+  paintPadToggle();
   $('comparison-results').innerHTML = `<div class="table-scroll"><table class="compare-table tv-table"><colgroup>${cols}</colgroup><thead><tr><th rowspan="2" scope="col">功能 / 适用场景</th>${g(`怪物猎人 · 旅人 · ${scheme.cur} 方案`, 'tv-head')}${g('怪物猎人 · 荒野')}${g('怪物猎人 · 世界 / 冰原', 'world')}</tr><tr>${sub}${sub}${sub}</tr></thead><tbody>${body}</tbody></table></div>`;
   $('comparison-total').textContent = `共 ${DATA.length} 项 · 改动自动缓存在本机浏览器，点「保存到 Excel」同步到配置表`;
   $('load-more').hidden = true;
@@ -308,14 +309,38 @@ function comboText(){
   return (modal.hold || '') + modal.parts.map(t => (modal.act && ['RS','LS','↑','↓','←','→'].includes(t)) ? modal.act + t : t).join('+');
 }
 function chipHtml(v, on, extra = ''){ return `<button type="button" class="tv-chip${on ? ' on' : ''} ${extra}" data-v="${esc(v)}">${esc(v)}</button>`; }
+function previewKbText(extraKey){
+  const parts = extraKey && !modal.parts.includes(extraKey) ? [...modal.parts, extraKey] : modal.parts;
+  const cur = (modal.hold ? modal.hold + ' ' : '') + parts.join('+') + (modal.tag ? '（切换）' : '');
+  return [...modal.alts, ...modal.raws, ...(parts.length ? [cur] : [])].join(' / ');
+}
+function kbConflictOwners(){
+  const map = {};
+  DATA.forEach(o => { if(o.id === modal.id) return; combosOfItem(o, scheme.cur).forEach(c => { (map[c] = map[c] || []).push(o); }); });
+  return map;
+}
+function kbHits(text, owners){
+  const d = byId(modal.id); if(!d || !String(text).trim()) return [];
+  const out = [], seen = new Set();
+  combosOfKb(text).forEach(c => (owners[c] || []).forEach(o => {
+    if(seen.has(o.id) || isShared(o.id, d.id) || !ctxOverlap(ctxOf(o), ctxOf(d))) return;
+    seen.add(o.id); out.push({ other:o, combo:c });
+  }));
+  return out;
+}
 function pickerHtml(){
   const groups = modal.mode === 'kb' ? KB_GROUPS : PAD_GROUPS;
-  const grids = groups.map(([label, keys]) => `<div class="tv-sec">${esc(label)}</div><div class="tv-chips">${keys.map(k => chipHtml(k, modal.parts.includes(k))).join('')}</div>`).join('');
+  const owners = modal.mode === 'kb' ? kbConflictOwners() : null;
+  const hitOf = k => modal.mode === 'kb' && kbHits(previewKbText(k), owners).length ? 'conflict' : '';
+  const grids = groups.map(([label, keys]) => `<div class="tv-sec">${esc(label)}</div><div class="tv-chips">${keys.map(k => chipHtml(k, modal.parts.includes(k), hitOf(k))).join('')}</div>`).join('');
   const prefix = modal.mode === 'pad' ? `<div class="tv-sec">前缀（单选）</div><div class="tv-chips">${['','长按','按住'].map(v => chipHtml(v || '（无）', modal.hold === v, 'mod')).join('')}</div><div class="tv-sec">摇杆 / 十字键动作（单选）</div><div class="tv-chips">${['','推','推满','按下'].map(v => chipHtml(v || '（无）', modal.act === v, 'mod')).join('')}</div>` : '';
   const opts = modal.mode === 'kb' ? `<div class="tv-sec">选项</div><div class="tv-chips">${chipHtml('按住起手', modal.hold === '按住', 'mod')}${chipHtml('切换式（切换）', modal.tag, 'mod')}</div>` : '';
   const alts = [...modal.alts, ...modal.raws];
-  return `<div class="tv-sec">${modal.mode === 'kb' ? '点击按键加入组合（再次点击移除）；修饰键 Shift/Ctrl/Alt 不会被判为冲突' : '点击手柄按键加入组合；先选前缀 / 动作，再点摇杆或十字键'}</div>${grids}${prefix}${opts}
+  const hits = modal.mode === 'kb' ? kbHits(previewKbText(), owners) : [];
+  const conflictHtml = hits.length ? `<div class="tv-conflict-inline"><b>⚠ 键位冲突 · 当前绑定与同场景 ${hits.length} 项功能重复</b>${hits.map(h => `<span>· ${esc(h.other.cat)} · ${esc(h.other.name)}（${esc(h.combo)}）</span>`).join('')}</div>` : '';
+  return `<div class="tv-sec">${modal.mode === 'kb' ? '点击按键加入组合（再次点击移除）；红色按键与已有功能冲突' : '点击手柄按键加入组合；先选前缀 / 动作，再点摇杆或十字键'}</div>${grids}${prefix}${opts}
   <div class="tv-comboline"><span class="lbl">当前组合</span><span class="input-set">${modal.parts.length ? `<span class="input-alternative${modal.parts.length > 1 && !(modal.mode === 'kb' && modal.hold) ? ' chord' : ''}">${modal.mode === 'kb' && modal.hold ? `<span class="input-hold">${modal.hold}</span>` : ''}${modal.parts.map(p => modal.mode === 'kb' ? kbKeyHtml(p) : A.padBadge(PAD_TOK[p] || p, padBrand.cur)).join('<span class="input-join">+</span>')}</span>` : '<span class="missing-value">尚未选择</span>'}</span><button type="button" class="tv-ghost" id="tv-combo-clear">清除</button></div>
+  ${conflictHtml}
   <div class="tv-sec">绑定值（可含多组，用「 / 」分隔）</div><div class="tv-comboline"><div class="tv-altlist" id="tv-altlist">${alts.length ? alts.map((a, i) => `<span class="tv-alt">${esc(a)}<button type="button" data-alt="${i}">×</button></span>`).join('') : '<span class="missing-value">空</span>'}</div><button type="button" class="tv-ghost" id="tv-alt-add">将当前组合加入</button></div>`;
 }
 function openEdit(id, mode){
@@ -375,7 +400,7 @@ function commitModal(){
     if(errs.length){ paintAltErrors(errs.join('；')); return; }
     const probe = { ...d, [kbField()]: final };
     const hits = conflictsFor(probe, scheme.cur);
-    if(hits.length && !confirm(`⚠ 键位重复\n${scheme.cur} 方案中「${final}」已被以下同场景功能使用：\n${hits.map(h => `· ${h.other.cat} · ${h.other.name}（${h.combo}）`).join('\n')}\n\n仍要设置吗？`)) return;
+    if(hits.length && !confirm(`该键位与「${hits.map(h => h.other.name).join('、')}」冲突（冲突详情已在编辑面板中红色标出）。\n\n仍要保存吗？`)) return;
     d[kbField()] = final;
   }else{
     if(!final.trim()){ paintAltErrors('请先点选手柄按键'); return; }
@@ -462,8 +487,26 @@ function ensureToolbar(){
     <span id="tv-status" class="tv-status"></span>
     <input type="file" id="tv-file" accept=".xlsx,.xls" hidden>`;
   document.querySelector('.controls-top').appendChild(box);
+  ensurePadToggle();
 }
-const HIDE_IN_TRAVELER = '.controls-bottom, .atlas-search, #tree-panel, #list-button, #review-button, .comparison-tools';
+function ensurePadToggle(){
+  if($('tv-pad-toggle')) return;
+  const head = document.querySelector('.comparison-heading'); if(!head) return;
+  const btn = document.createElement('button');
+  btn.id = 'tv-pad-toggle'; btn.className = 'subtle-button tv-pad-toggle';
+  btn.title = '切换手柄按键图标品牌（PlayStation / Xbox）';
+  btn.addEventListener('click', () => {
+    padBrand.cur = padBrand.cur === 'xbox' ? 'ps' : 'xbox';
+    const s = $('tv-pad-brand'); if(s) s.value = padBrand.cur;
+    applyPadBrand(); render();
+  });
+  head.appendChild(btn);
+}
+function paintPadToggle(){
+  const btn = $('tv-pad-toggle'); if(!btn) return;
+  btn.innerHTML = `${A.brand(padBrand.cur)}手柄 · ${padBrand.cur === 'ps' ? 'PlayStation' : 'Xbox'}`;
+}
+const HIDE_IN_TRAVELER = '.controls-bottom, .atlas-search, #tree-panel, #list-button, #review-button, .comparison-tools, #tv-pad-toggle';
 function showToolbar(on){
   document.querySelectorAll(HIDE_IN_TRAVELER).forEach(el => { el.style.display = on ? 'none' : ''; });
   ensureToolbar();
